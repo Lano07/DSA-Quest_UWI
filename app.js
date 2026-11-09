@@ -251,7 +251,9 @@ function renderChallenge(){const c=challengeFor(challengeId);if(!c){challengeId=
 function editorMarkup(code,isChallenge){return '<div class="editor-grid"><section class="editor-box"><div class="editor-top"><span><span class="file-dot"></span>'+(isChallenge?'solution.cpp':'main.cpp')+'</span><span class="muted">C++ · '+(fullRunnerUrl()?'full compiler':'browser interpreter')+'</span></div><textarea class="editor" id="codeEditor" spellcheck="false" aria-label="C++ code editor">'+escapeHTML(code)+'</textarea><div class="editor-tools"><span class="muted" style="font:11px var(--mono)">Ctrl/⌘ + Enter to run</span><div class="actions" style="margin:0"><button class="btn alt small" data-action="reset-code">↻ Reset</button><button class="btn small" data-action="run-code" id="runButton">▶ '+(isChallenge?'Run & check':'Run code')+'</button></div></div></section><section class="terminal-box"><div class="terminal-head"><span>⌁ TERMINAL / OUTPUT</span><span class="status" id="runnerStatus">'+consoleStatus+'</span></div><pre class="terminal-output" id="runnerOutput">'+escapeHTML(consoleText)+'</pre><div style="padding:0 14px 16px"><label for="stdin" class="form-label">STANDARD INPUT (stdin)</label><textarea class="field" id="stdin" rows="2" placeholder="Enter input separated by spaces or lines...">'+escapeHTML(isChallenge?challengeFor(challengeId).input:state.stdin)+'</textarea>'+(isChallenge?'':'<div class="actions" style="margin-top:9px"><button class="btn alt small" data-action="load-input">Load input.txt</button><button class="btn alt small" data-action="save-output">Save output.txt</button></div>')+'</div></section></div>';}
 
 state.runnerUrl = typeof state.runnerUrl === 'string' ? state.runnerUrl : '';
+state.browserOnly = Boolean(state.browserOnly);
 function fullRunnerUrl(){
+  if(state.browserOnly)return '';
   if(state.runnerUrl)return state.runnerUrl.replace(/\/+$/,'');
   if((location.hostname==='localhost'||location.hostname==='127.0.0.1')&&location.port==='8787')return location.origin;
   return '';
@@ -390,9 +392,9 @@ if(a==='save-runner-url'){
   if(url&&(!/^https?:\/\/[\w.-]+(?::\d+)?(?:\/[\w./-]*)?$/.test(url)|| (location.protocol==='https:'&&!url.startsWith('https://')))){
     toast('Enter a valid HTTPS endpoint, or run the site locally with the compiler server.');return;
   }
-  state.runnerUrl=url;save();render();toast(url?'Full C++ endpoint saved.':'Browser runner selected.');
+  state.runnerUrl=url;state.browserOnly=!url;save();render();toast(url?'Full C++ endpoint saved.':'Browser runner selected.');
 }
-if(a==='clear-runner-url'){state.runnerUrl='';save();render();toast('Browser runner selected.');}
+if(a==='clear-runner-url'){state.runnerUrl='';state.browserOnly=true;save();render();toast('Browser runner selected.');}
 if(a==='reset-code'){if(page==='playground'){state.files['main.cpp']=defaultCode;}else{state.practiceCode[challengeId]=challengeFor(challengeId).starter;}save();render();toast('Starter code restored.');}
 if(a==='load-input'){$('#stdin').value=state.files['input.txt']||'';state.stdin=$('#stdin').value;save();toast('Loaded input.txt into stdin.');}
 if(a==='save-output'){state.files['output.txt']=consoleText.split('\n\n[process exited:')[0];save();toast('Output saved to virtual file.');}
