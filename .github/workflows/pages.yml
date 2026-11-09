@@ -19,16 +19,25 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: \${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Check JavaScript and server syntax
+        run: |
+          node --check app.js
+          node --check backend/server.mjs
+          node tests/smoke.mjs
+      - name: Prepare public website
+        run: |
+          mkdir -p site
+          cp index.html app.js style.css extras.css site/
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload website
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: ./site
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
