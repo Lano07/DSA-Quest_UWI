@@ -23,4 +23,4 @@ This server **does not** give programs access to arbitrary files on your real co
 
 The local runner has a four-second program time limit, 384 MB container memory limit, disabled networking and a two-job concurrency cap. Compiler output and program output are limited. Docker containers reduce risk but are not a fully hardened sandbox. **Do not expose this server to the public internet**, including by forwarding the port or changing the host binding. For a hosted mobile/tablet full compiler, use a professionally managed, secured code-execution service instead. The public Piston endpoint now requires authorization and cannot be assumed available.
 
-Use **Settings → C++ execution mode** in the playground to configure an alternative *trusted* HTTPS execution endpoint offering the same `POST /api/run` JSON contract if you set one up.
+Use **Playground → C++ execution mode** to configure an alternative *trusted* HTTPS execution endpoint offering the same `POST /api/run` JSON contract if you set one up.
