@@ -14,7 +14,7 @@ assert.match(index,/extras\.css/);
 const source=readFileSync(resolve(root,'app.js'),'utf8');
 const instrumented=source.replace(
   'render();\n})();',
-  'globalThis.TEST={lessons,challenges,modules,framesFor,labLabels,renderHome,renderPlayground,renderPractice,renderRoadmap,previewLab:(name)=>{labMode=name;labStep=0;return renderLab();}};render();\n})();'
+  'globalThis.TEST={lessons,challenges,modules,framesFor,labLabels,renderHome,renderPlayground,renderPractice,renderRoadmap,renderBoss,startBoss,previewLab:(name)=>{labMode=name;labStep=0;return renderLab();}};render();\n})();'
 );
 assert.notEqual(instrumented,source,'Smoke test injection not found');
 const els=new Map();
@@ -26,7 +26,7 @@ function element(id){
   return els.get(id);
 }
 const context={
-  document:{querySelector:element,querySelectorAll:()=>[],addEventListener(){}},
+  document:{querySelector:element,querySelectorAll:()=>[],addEventListener(){},body:{classList:{remove(){},toggle(){}}}},
   window:{addEventListener(){},scrollTo(){}},
   location:{hash:'',protocol:'https:',hostname:'lano07.github.io',origin:'https://lano07.github.io',port:''},
   localStorage:{getItem:()=>null,setItem(){}},
@@ -57,7 +57,11 @@ for(const mode of Object.keys(TEST.labLabels)){
   assert.match(TEST.previewLab(mode),/STEP 1/,mode+' does not render');
 }
 assert.match(TEST.renderPlayground(),/runnerEndpoint/);
+assert.match(TEST.renderPlayground(),/Backup files \+ XP/);
+assert.match(TEST.renderBoss(),/Start battle/);
+TEST.startBoss();
+assert.match(TEST.renderBoss(),/QUESTION 1 \/ 10/);
 assert.match(TEST.renderPractice(),/Code Gym|CODE GYM|SKILL BUILDER/);
 assert.match(TEST.renderRoadmap(),/COMP 2611/);
 assert.match(TEST.renderHome(),/Continue learning/);
-console.log('PASS: '+TEST.lessons.length+' lessons, '+TEST.challenges.length+' missions, '+Object.keys(TEST.labLabels).length+' labs and app navigation render.');
+console.log('PASS: '+TEST.lessons.length+' lessons, '+TEST.challenges.length+' missions, '+Object.keys(TEST.labLabels).length+' labs and boss battle render.');
