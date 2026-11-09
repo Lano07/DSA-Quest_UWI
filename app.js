@@ -148,19 +148,95 @@ let a=[7,3,9,1,5],steps=[{array:[...a],focus:-1,explain:'Bubble sort: compare ad
 function renderLab(){const labels={array:'Bubble sort',stack:'Stack operations',binary:'Binary search'},frames=framesFor(labMode),fr=frames[Math.min(labStep,frames.length-1)];return '<div class="page"><div class="eyebrow">INTERACTIVE VISUALIZERS</div><h1>See the <span class="highlight">logic.</span></h1><p class="desc">Move through the algorithm like a flipbook. Track exactly what changes at each step.</p><div class="lab-layout"><div class="lab-panel"><h3>Experiments</h3><p class="muted" style="font-size:13px">Choose a structure.</p><div class="lab-select">'+Object.keys(labels).map(k=>'<button class="lab-mode '+(labMode===k?'active':'')+'" data-lab="'+k+'">'+(k==='array'?'◈ ':k==='stack'?'▤ ':'⌕ ')+labels[k]+'</button>').join('')+'</div><div class="note">These demos use fixed example values so you can follow each operation. More visual labs are planned.</div></div><div class="lab-panel"><div class="challenge-head"><h2>'+labels[labMode]+'</h2><span class="tag green">STEP '+(labStep+1)+' / '+frames.length+'</span></div><div class="viz-stage">'+(fr.array.length?fr.array.map((v,i)=>'<div class="array-node '+(i===fr.focus||i===fr.focus2?'focus':'')+'">'+v+'<span>'+ (labMode==='stack'?(i===fr.array.length-1?'TOP':'node '+i):'['+i+']')+'</span></div>').join(''):'<span class="muted">EMPTY STACK</span>')+'</div><div class="viz-explain">'+escapeHTML(fr.explain)+'</div><div class="viz-controls" style="margin-top:18px"><button class="btn alt" data-action="lab-prev" '+(labStep===0?'disabled':'')+'>← Previous</button><button class="btn" data-action="lab-next" '+(labStep>=frames.length-1?'disabled':'')+'>Next step →</button><button class="btn outline" data-action="lab-reset">↻ Reset</button></div><div class="note">Watch the highlighted items: green means the algorithm is working with these values now.</div></div></div></div>';}
 function renderPractice(){if(challengeId)return renderChallenge();const categories=['All',...new Set(challenges.map(c=>c.category))],filtered=challenges.filter(c=>challengeFilter==='All'||challengeFilter===c.category);return '<div class="page"><div class="eyebrow">SKILL BUILDER / CODE GYM</div><h1>Prove it with <span class="highlight">code.</span></h1><p class="desc">Write C++ yourself and check the output against a sample case. Passing a sample is a milestone; new missions also check extra hidden cases.</p><div class="filter-tabs">'+categories.map(c=>'<button data-filter="'+c+'" class="tab-button '+(challengeFilter===c?'active':'')+'">'+c+'</button>').join('')+'</div><div class="challenge-list">'+filtered.map((c,i)=>'<article class="challenge-item" data-challenge="'+c.id+'"><div><div class="tag '+(state.solved[c.id]?'green':'')+'">'+(state.solved[c.id]?'✓ SOLVED':'✦ 50 XP')+'</div><h3 style="margin-top:11px">'+escapeHTML(c.title)+'</h3><p>'+escapeHTML(c.desc)+'</p></div><div style="text-align:right;flex:none"><span class="tag">'+c.category.toUpperCase()+'</span><div style="color:var(--lime);font-size:25px;margin-top:8px">→</div></div></article>').join('')+'</div></div>';}
 function renderChallenge(){const c=challengeFor(challengeId);if(!c){challengeId=null;return renderPractice();}const code=state.practiceCode[c.id]===undefined?c.starter:state.practiceCode[c.id];return '<div class="page"><div class="lesson-top"><button class="back-button" data-action="back-practice">← All challenges</button><span class="tag pink">'+c.category.toUpperCase()+'</span></div><div class="eyebrow">CODE MISSION / '+(challenges.findIndex(x=>x.id===c.id)+1).toString().padStart(2,'0')+'</div><h1>'+escapeHTML(c.title)+'</h1><div class="challenge-brief"><h3>Your mission</h3><p>'+escapeHTML(c.desc)+'</p><div class="kv">SAMPLE INPUT</div><pre>'+escapeHTML(c.input||'(none)')+'</pre><div class="kv">EXPECTED OUTPUT</div><pre>'+escapeHTML(c.expected)+'</pre><details style="margin-top:18px"><summary class="muted" style="cursor:pointer">Need a hint?</summary><p>'+escapeHTML(c.hint)+'</p></details></div>'+editorMarkup(code,true)+'<p class="note">The judge checks the sample and, where included, extra test cases. The browser interpreter supports a C++ subset; use the optional local compiler for full C++.</p></div>';}
-function editorMarkup(code,isChallenge){return '<div class="editor-grid"><section class="editor-box"><div class="editor-top"><span><span class="file-dot"></span>'+(isChallenge?'solution.cpp':'main.cpp')+'</span><span class="muted">C++ · educational interpreter</span></div><textarea class="editor" id="codeEditor" spellcheck="false" aria-label="C++ code editor">'+escapeHTML(code)+'</textarea><div class="editor-tools"><span class="muted" style="font:11px var(--mono)">Ctrl/⌘ + Enter to run</span><div class="actions" style="margin:0"><button class="btn alt small" data-action="reset-code">↻ Reset</button><button class="btn small" data-action="run-code" id="runButton">▶ '+(isChallenge?'Run & check':'Run code')+'</button></div></div></section><section class="terminal-box"><div class="terminal-head"><span>⌁ TERMINAL / OUTPUT</span><span class="status" id="runnerStatus">'+consoleStatus+'</span></div><pre class="terminal-output" id="runnerOutput">'+escapeHTML(consoleText)+'</pre><div style="padding:0 14px 16px"><label for="stdin" class="form-label">STANDARD INPUT (stdin)</label><textarea class="field" id="stdin" rows="2" placeholder="Enter input separated by spaces or lines...">'+escapeHTML(isChallenge?challengeFor(challengeId).input:state.stdin)+'</textarea>'+(isChallenge?'':'<div class="actions" style="margin-top:9px"><button class="btn alt small" data-action="load-input">Load input.txt</button><button class="btn alt small" data-action="save-output">Save output.txt</button></div>')+'</div></section></div>';}
-function renderPlayground(){const filenames=Object.keys(state.files),active=state.files[state.activeFile]===undefined?'main.cpp':state.activeFile;return '<div class="page"><div class="eyebrow">YOUR OWN SPACE / CREATIVE MODE</div><h1>The <span class="highlight">playground.</span></h1><p class="desc">Experiment with supported C++ code and maintain a virtual collection of text files. The runner executes main.cpp; it does not compile multiple source files or support C++ fstream.</p>'+editorMarkup(state.files['main.cpp'],false)+'<div class="workspace-files card"><div class="challenge-head"><h2>▤ Virtual file workspace</h2><div class="actions" style="margin:0"><button class="btn alt small" data-action="add-file">+ New file</button><button class="btn alt small" data-action="import-file">↑ Import</button><input type="file" id="fileImport" accept=".txt,.cpp,.h,.hpp,.csv,.json,text/plain" hidden></div></div><p class="muted" style="font-size:13px">Files persist in this browser only, not on your device\'s actual disk.</p><div class="file-list">'+filenames.map(name=>'<button class="file-tab '+(active===name?'selected':'')+'" data-file="'+escapeHTML(name)+'">'+escapeHTML(name)+'</button>').join('')+'</div><label for="virtualFile" class="form-label">EDIT '+escapeHTML(active)+'</label><textarea class="editor field" style="min-height:160px" id="virtualFile" data-filename="'+escapeHTML(active)+'">'+escapeHTML(state.files[active])+'</textarea><div class="actions"><button class="btn alt small" data-action="download-file">↓ Download file</button><button class="btn alt small" data-action="delete-file" '+(active==='main.cpp'?'disabled':'')+'>Delete file</button><button class="btn alt small" data-action="export-project">↓ Export project JSON</button><button class="btn alt small" data-action="import-project">↑ Restore JSON</button><input type="file" id="projectImport" accept=".json" hidden></div><div class="note"><strong>Current runner limits:</strong> educational C++ subset (loops, arrays, pointers, functions, basic I/O). No STL containers, arbitrary OS filesystem access, linking, network calls, fstream, or multi-file compilation. Your text files are for notes, input and saved output; they are not mounted into C++ code.</div></div></div>';}
+function editorMarkup(code,isChallenge){return '<div class="editor-grid"><section class="editor-box"><div class="editor-top"><span><span class="file-dot"></span>'+(isChallenge?'solution.cpp':'main.cpp')+'</span><span class="muted">C++ · '+(fullRunnerUrl()?'full compiler':'browser interpreter')+'</span></div><textarea class="editor" id="codeEditor" spellcheck="false" aria-label="C++ code editor">'+escapeHTML(code)+'</textarea><div class="editor-tools"><span class="muted" style="font:11px var(--mono)">Ctrl/⌘ + Enter to run</span><div class="actions" style="margin:0"><button class="btn alt small" data-action="reset-code">↻ Reset</button><button class="btn small" data-action="run-code" id="runButton">▶ '+(isChallenge?'Run & check':'Run code')+'</button></div></div></section><section class="terminal-box"><div class="terminal-head"><span>⌁ TERMINAL / OUTPUT</span><span class="status" id="runnerStatus">'+consoleStatus+'</span></div><pre class="terminal-output" id="runnerOutput">'+escapeHTML(consoleText)+'</pre><div style="padding:0 14px 16px"><label for="stdin" class="form-label">STANDARD INPUT (stdin)</label><textarea class="field" id="stdin" rows="2" placeholder="Enter input separated by spaces or lines...">'+escapeHTML(isChallenge?challengeFor(challengeId).input:state.stdin)+'</textarea>'+(isChallenge?'':'<div class="actions" style="margin-top:9px"><button class="btn alt small" data-action="load-input">Load input.txt</button><button class="btn alt small" data-action="save-output">Save output.txt</button></div>')+'</div></section></div>';}
+
+state.runnerUrl = typeof state.runnerUrl === 'string' ? state.runnerUrl : '';
+function fullRunnerUrl(){
+  if(state.runnerUrl)return state.runnerUrl.replace(/\/+$/,'');
+  if((location.hostname==='localhost'||location.hostname==='127.0.0.1')&&location.port==='8787')return location.origin;
+  return '';
+}
+function renderRunnerSettings(){
+  const url=fullRunnerUrl();
+  return '<section class="card runner-settings"><div class="challenge-head"><div><h3>⚙ C++ execution mode</h3><p class="muted">Default: in-browser C++ subset. For STL, multiple source files and real fstream read/write, start the optional sandbox server described in README.</p></div><span class="tag '+(url?'green':'')+'">'+(url?'FULL C++ ENDPOINT':'BROWSER INTERPRETER')+'</span></div><label class="form-label" for="runnerEndpoint">FULL C++ SERVER URL (OPTIONAL)</label><div class="runner-setting-row"><input class="field" id="runnerEndpoint" type="url" placeholder="http://localhost:8787" value="'+escapeHTML(state.runnerUrl)+'"><button class="btn small" data-action="save-runner-url">Save URL</button><button class="btn alt small" data-action="clear-runner-url">Use browser</button></div><p class="note">Remote websites need an HTTPS compiler endpoint. Code sent to a configured server is processed there. Do not enter a server you do not trust.</p></section>';
+}
+
+function renderPlayground(){const filenames=Object.keys(state.files),active=state.files[state.activeFile]===undefined?'main.cpp':state.activeFile;return '<div class="page"><div class="eyebrow">YOUR OWN SPACE / CREATIVE MODE</div><h1>The <span class="highlight">playground.</span></h1><p class="desc">Experiment with supported C++ code and maintain a virtual collection of text files. The browser runner supports an educational C++ subset. Connect the optional full compiler server to compile multiple .cpp files and use virtual files with fstream.</p>'+editorMarkup(state.files['main.cpp'],false)+renderRunnerSettings()+'<div class="workspace-files card"><div class="challenge-head"><h2>▤ Virtual file workspace</h2><div class="actions" style="margin:0"><button class="btn alt small" data-action="add-file">+ New file</button><button class="btn alt small" data-action="import-file">↑ Import</button><input type="file" id="fileImport" accept=".txt,.cpp,.h,.hpp,.csv,.json,text/plain" hidden></div></div><p class="muted" style="font-size:13px">Files persist in this browser only, not on your device\'s actual disk.</p><div class="file-list">'+filenames.map(name=>'<button class="file-tab '+(active===name?'selected':'')+'" data-file="'+escapeHTML(name)+'">'+escapeHTML(name)+'</button>').join('')+'</div><label for="virtualFile" class="form-label">EDIT '+escapeHTML(active)+'</label><textarea class="editor field" style="min-height:160px" id="virtualFile" data-filename="'+escapeHTML(active)+'">'+escapeHTML(state.files[active])+'</textarea><div class="actions"><button class="btn alt small" data-action="download-file">↓ Download file</button><button class="btn alt small" data-action="delete-file" '+(active==='main.cpp'?'disabled':'')+'>Delete file</button><button class="btn alt small" data-action="export-project">↓ Export project JSON</button><button class="btn alt small" data-action="import-project">↑ Restore JSON</button><input type="file" id="projectImport" accept=".json" hidden></div><div class="note"><strong>Current runner limits:</strong> educational C++ subset (loops, arrays, pointers, functions, basic I/O). No full STL, fstream or multi-file compilation in browser mode. The optional isolated local backend mounts this virtual workspace for ordinary C++ file I/O. It never grants access to your device’s other files.</div></div></div>';}
 function renderRoadmap(){return '<div class="page"><div class="eyebrow">COMP 2611 · THE BIG PICTURE</div><h1>Know where <span class="highlight">you’re going.</span></h1><p class="desc">A practical study roadmap for Data Structures at UWI St. Augustine. Topics are organized for learning and should be checked against the syllabus and lecture materials for your particular semester.</p>'+modules.map((m,i)=>'<div class="roadmap-line"><span class="tag">'+m.icon+'</span> <strong>'+escapeHTML(m.name)+'</strong><p>'+escapeHTML(m.blurb)+'</p><button class="btn alt small" style="margin-top:12px" data-module="'+m.id+'">Open lessons →</button></div>').join('')+'<div class="note">Learning activities, quizzes and algorithm visualizers are an independent study aid. This first release does not cover every assessment detail or offer fully validated C++ execution.</div></div>';}
 function setOutput(output,status){consoleText=output;consoleStatus=status||'READY';const o=$('#runnerOutput'),s=$('#runnerStatus');if(o)o.textContent=consoleText;if(s)s.textContent=consoleStatus;}
 const runnerUrl='https://cdn.jsdelivr.net/gh/felixhao28/JSCPP@gh-pages/dist/JSCPP.es5.min.js';
-function executeCPP(code,input){return new Promise((resolve,reject)=>{
-const workerCode='self.onmessage=function(e){try{importScripts('+JSON.stringify(runnerUrl)+');if(!self.JSCPP)throw Error("C++ interpreter unavailable");var output="";var rc=self.JSCPP.run(e.data.code,e.data.input,{stdio:{write:function(s){output+=s;if(output.length>100000)throw Error("Output limit reached")}}});self.postMessage({ok:true,output:output,exitCode:rc});}catch(err){self.postMessage({ok:false,error:String(err.message||err)})}};';
-let worker,url,timeout;let finished=false;
-const done=(error,data)=>{if(finished)return;finished=true;clearTimeout(timeout);if(worker)worker.terminate();if(url)URL.revokeObjectURL(url);error?reject(error):resolve(data);};
-try{url=URL.createObjectURL(new Blob([workerCode],{type:'text/javascript'}));worker=new Worker(url);worker.onmessage=e=>{const d=e.data;if(d.ok)done(null,d);else done(new Error(d.error));};worker.onerror=()=>done(new Error('Interpreter could not load. Check your internet connection.'));timeout=setTimeout(()=>done(new Error('Stopped after 5 seconds to protect your browser. Check for infinite loops.')),5000);worker.postMessage({code:code,input:input});}catch(e){done(e);}
-});}
+
+async function executeCPP(code,input,files){
+  const remote=fullRunnerUrl();
+  if(remote){
+    const ac=new AbortController(),t=setTimeout(()=>ac.abort(),20000);
+    try{
+      const response=await fetch(remote+'/api/run',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({code,stdin:input||'',files:files||{'main.cpp':code}}),
+        signal:ac.signal
+      });
+      const data=await response.json();
+      if(!response.ok)throw Error(data.error||'Compiler service returned HTTP '+response.status);
+      return {output:data.stdout||'',stderr:data.stderr||'',exitCode:data.exitCode,files:data.files||{},compiler:'g++'};
+    }catch(err){
+      if(err.name==='AbortError')throw Error('Compiler service timed out.');
+      throw Error('Full compiler: '+err.message);
+    }finally{clearTimeout(t);}
+  }
+  return new Promise((resolve,reject)=>{
+    const workerCode='self.onmessage=function(e){try{importScripts('+JSON.stringify(runnerUrl)+');if(!self.JSCPP)throw Error("C++ interpreter unavailable");var output="";var rc=self.JSCPP.run(e.data.code,e.data.input,{stdio:{write:function(s){output+=s;if(output.length>100000)throw Error("Output limit reached")}}});self.postMessage({ok:true,output:output,exitCode:rc});}catch(err){self.postMessage({ok:false,error:String(err.message||err)})}};';
+    let worker,url,timeout,finished=false;
+    const done=(error,data)=>{if(finished)return;finished=true;clearTimeout(timeout);if(worker)worker.terminate();if(url)URL.revokeObjectURL(url);error?reject(error):resolve(data);};
+    try{url=URL.createObjectURL(new Blob([workerCode],{type:'text/javascript'}));worker=new Worker(url);worker.onmessage=e=>{const d=e.data;d.ok?done(null,d):done(new Error(d.error));};worker.onerror=()=>done(new Error('Browser interpreter failed to load. Check internet connectivity.'));timeout=setTimeout(()=>done(new Error('Stopped after 5 seconds. Check for an infinite loop.')),5000);worker.postMessage({code,input});}catch(e){done(e);}
+  });
+}
 function download(name,content,type){const blob=new Blob([content],{type:type||'text/plain'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1200);}
-async function runEditor(){if(runBusy)return;const editor=$('#codeEditor'),stdin=$('#stdin');if(!editor)return;const code=editor.value,input=stdin?stdin.value:'';if(page==='playground'){state.files['main.cpp']=code;state.stdin=input;save();}if(page==='practice'){state.practiceCode[challengeId]=code;save();}runBusy=true;const btn=$('#runButton');if(btn)btn.disabled=true;setOutput('Running your C++ code…','RUNNING');try{const result=await executeCPP(code,input);const out=String(result.output||'');setOutput((out||'(no output)')+'\n\n[process exited: '+result.exitCode+']','FINISHED');if(page==='playground'){state.files['output.txt']=out;save();}else{const c=challengeFor(challengeId);if(c&&out.trim().replace(/\s+/g,' ')===c.expected.trim().replace(/\s+/g,' ')){if(!state.solved[c.id]){state.solved[c.id]=true;award(50);}setOutput((out||'(no output)')+'\n\n✓ Sample passed! Good work.','PASSED');}else setOutput((out||'(no output)')+'\n\n✕ Sample did not match expected output.\nExpected: '+c.expected,'TRY AGAIN');}}catch(e){setOutput('Error: '+e.message+'\n\nThis educational browser interpreter supports a subset of C++ only.','ERROR');}finally{runBusy=false;if(btn)btn.disabled=false;}}
+
+async function runEditor(){
+  if(runBusy)return;
+  const editor=$('#codeEditor'),stdin=$('#stdin');if(!editor)return;
+  const code=editor.value,input=stdin?stdin.value:'';
+  if(page==='playground'){state.files['main.cpp']=code;state.stdin=input;save();}
+  if(page==='practice'){state.practiceCode[challengeId]=code;save();}
+  runBusy=true;
+  const btn=$('#runButton');if(btn)btn.disabled=true;
+  setOutput('Running C++…','RUNNING');
+  try{
+    const inPlayground=page==='playground';
+    const workingFiles=inPlayground?{...state.files}:{'main.cpp':code};
+    const result=await executeCPP(code,input,workingFiles);
+    const out=String(result.output||'');
+    const err=String(result.stderr||'');
+    const exit=Number(result.exitCode)||0;
+    if(inPlayground){
+      if(result.files&&result.compiler==='g++'){
+        for(const [name,value] of Object.entries(result.files)){
+          if(/^[\w.-]{1,64}$/.test(name)&&typeof value==='string'&&name!=='main.cpp')state.files[name]=value;
+        }
+      }
+      state.files['output.txt']=out;save();
+      setOutput((out||'(no stdout)')+(err?'\n\nstderr:\n'+err:'')+'\n\n[process exited: '+exit+']',exit===0?'FINISHED':'EXIT '+exit);
+    }else{
+      const c=challengeFor(challengeId);
+      const norm=s=>String(s||'').trim().replace(/\s+/g,' ');
+      if(exit!==0||norm(out)!==norm(c.expected)){
+        setOutput((out||'(no output)')+(err?'\n\n'+err:'')+'\n\n✕ Sample failed. Expected: '+c.expected,'TRY AGAIN');return;
+      }
+      const tests=Array.isArray(c.tests)?c.tests:[];
+      for(let i=0;i<tests.length;i++){
+        setOutput('Sample passed. Checking extra case '+(i+1)+' of '+tests.length+'…','TESTING');
+        const t=tests[i],result2=await executeCPP(code,t.input,{'main.cpp':code});
+        if(Number(result2.exitCode)!==0||norm(result2.output)!==norm(t.expected)){
+          setOutput('Sample passed.\n✕ Extra test '+(i+1)+' failed.\nInput: '+t.input+'\nExpected: '+t.expected+'\nGot: '+(result2.output||'(no output)')+(result2.stderr?'\n'+result2.stderr:''),'TRY AGAIN');return;
+        }
+      }
+      if(!state.solved[c.id]){state.solved[c.id]=true;award(50);}
+      setOutput((out||'(no output)')+'\n\n✓ Passed sample'+(tests.length?' + '+tests.length+' extra tests':'')+'! +50 XP for your first solve.','PASSED');
+    }
+  }catch(e){setOutput('Error: '+e.message+'\n\nUse the browser C++ subset or configure the optional sandbox compiler.','ERROR');}
+  finally{runBusy=false;if(btn)btn.disabled=false;}
+}
 app.addEventListener('click',async e=>{
 const nav=e.target.closest('[data-page]');if(nav){navigate(nav.dataset.page);return;}
 const module=e.target.closest('[data-module]');if(module){moduleId=module.dataset.module;lessonId=null;state.showModule=true;navigate('learn');return;}
@@ -180,6 +256,14 @@ if(a==='lab-prev'){labStep=Math.max(labStep-1,0);render();}
 if(a==='lab-reset'){labStep=0;render();}
 if(a==='back-practice'){challengeId=null;render();}
 if(a==='run-code')await runEditor();
+if(a==='save-runner-url'){
+  let url=($('#runnerEndpoint')?.value||'').trim().replace(/\/+$/,'');
+  if(url&&(!/^https?:\/\/[\w.-]+(?::\d+)?(?:\/[\w./-]*)?$/.test(url)|| (location.protocol==='https:'&&!url.startsWith('https://')))){
+    toast('Enter a valid HTTPS endpoint, or run the site locally with the compiler server.');return;
+  }
+  state.runnerUrl=url;save();render();toast(url?'Full C++ endpoint saved.':'Browser runner selected.');
+}
+if(a==='clear-runner-url'){state.runnerUrl='';save();render();toast('Browser runner selected.');}
 if(a==='reset-code'){if(page==='playground'){state.files['main.cpp']=defaultCode;}else{state.practiceCode[challengeId]=challengeFor(challengeId).starter;}save();render();toast('Starter code restored.');}
 if(a==='load-input'){$('#stdin').value=state.files['input.txt']||'';state.stdin=$('#stdin').value;save();toast('Loaded input.txt into stdin.');}
 if(a==='save-output'){state.files['output.txt']=consoleText.split('\n\n[process exited:')[0];save();toast('Output saved to virtual file.');}
