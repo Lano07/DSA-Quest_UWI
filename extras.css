@@ -39,3 +39,12 @@
   .linked-arrow{font-size:14px}
 }
 @media(prefers-reduced-motion:reduce){.lab-mode,.hash-row{transition:none}}
+
+.boss-hero{margin:25px auto;max-width:740px;padding:clamp(30px,6vw,74px);text-align:center;border:1px solid #54416f;border-radius:24px;background:radial-gradient(circle at 50% 15%,#372355 0,#191e3a 43%,#0d1427 85%);box-shadow:0 20px 65px #06091699}
+.boss-hero h1{margin:16px 0}.boss-hero p{color:var(--muted);line-height:1.8;max-width:470px;margin:12px auto 24px}
+.boss-icon{font-size:70px;line-height:1.1;margin:12px 0 22px;color:var(--pink);filter:drop-shadow(0 0 22px #d76fe166)}
+.boss-prize{font:700 13px var(--mono);color:var(--lime);margin:0 0 25px}
+.boss-hud{display:flex;justify-content:space-between;align-items:center;margin:24px 0;gap:12px;flex-wrap:wrap}
+.boss-hearts{color:#ff6e9e;font-size:29px;letter-spacing:5px}
+.boss-question{margin-top:25px}.boss-question h1{font-size:clamp(25px,4vw,38px);line-height:1.3}
+@media(max-width:740px){.boss-hero{margin:12px auto;padding:30px 19px}.boss-icon{font-size:54px}.boss-hearts{font-size:23px}}
