@@ -6,6 +6,7 @@ A game-inspired, responsive **C++ Data Structures & Algorithms academy** built f
 
 - Learn through **61 guided lessons** in **14 tracks**, from basic C++, pointers, linked lists and recursion to trees, BST/AVL trees, heaps, hashing, BFS/DFS, Dijkstra, sorting, matrices, algorithm analysis and proofs. Each lesson has an example, a question, feedback and XP.
 - Explore **14 interactive visual labs**. Move one step at a time or use auto-play. Labs include pointer-based lists, queue operations, stack operations, recursion, heaps, hashing, trees, BFS/DFS, Dijkstra and sorting.
+- Fight the **Code Hydra**, a ten-question boss battle drawing from all lesson tracks, with three hearts and a first-win XP reward.
 - Work through **24 C++ coding missions** with hints, sample I/O, a code editor, an output terminal, automatic checks and extra cases for recent missions.
 - Use the **Playground** to edit C++, provide standard input, maintain several virtual files, import text files, export a backup, and keep progress and XP in browser storage.
 - Connect the **optional local full C++17 compiler** for STL, multiple .cpp files, and real `std::ifstream`/`std::ofstream` I/O with files in the virtual workspace.
