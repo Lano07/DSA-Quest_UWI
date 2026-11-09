@@ -111,7 +111,7 @@ const ch=e.target.closest('[data-challenge]');if(ch){challengeId=ch.dataset.chal
 const mode=e.target.closest('[data-lab]');if(mode){labMode=mode.dataset.lab;labStep=0;render();return;}
 const filter=e.target.closest('[data-filter]');if(filter){challengeFilter=filter.dataset.filter;render();return;}
 const file=e.target.closest('[data-file]');if(file){state.activeFile=file.dataset.file;save();render();return;}
-const ans=e.target.closest('[data-answer]');if(ans&&lessonId){const l=lessonFor(lessonId);state.answerSelections=state.answerSelections||{};if(state.answerSelections[l.id]!==undefined)return;const answer=Number(ans.dataset.answer);state.answerSelections[l.id]=answer;if(answer===l.answer&&!state.done[l.id]){state.done[l.id]=true;award(30);}save();render();return;}
+const ans=e.target.closest('[data-answer]');if(ans&&lessonId){const l=lessonFor(lessonId);state.answerSelections=state.answerSelections||{};if(state.answerSelections[l.id]!==undefined)return;const answer=Number(ans.dataset.answer);if(answer!==l.answer){toast('Not quite. Hint: '+l.why);return;}state.answerSelections[l.id]=answer;if(!state.done[l.id]){state.done[l.id]=true;award(30);}save();render();return;}
 const btn=e.target.closest('[data-action]');if(!btn)return;const a=btn.dataset.action;
 if(a==='start-learning'){const next=lessons.find(l=>!state.done[l.id])||lessons[0];moduleId=next.module;lessonId=next.id;state.showModule=true;navigate('learn');}
 if(a==='all-modules'){state.showModule=false;lessonId=null;render();}
