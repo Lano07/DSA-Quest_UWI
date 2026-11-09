@@ -134,18 +134,104 @@ const challengeFor=id=>challenges.find(l=>l.id===id);
 const totalDone=()=>Object.keys(state.done).filter(k=>state.done[k]).length;
 const totalSolved=()=>Object.keys(state.solved).filter(k=>state.solved[k]).length;
 const titleMap={home:'Command center',learn:'Learning path',lab:'Visual labs',practice:'Code challenges',playground:'C++ playground',roadmap:'COMP 2611 roadmap'};
-function navigate(to,params){page=to;if(params){if(params.module)moduleId=params.module;if(params.lesson!==undefined)lessonId=params.lesson;if(params.challenge!==undefined)challengeId=params.challenge;}render();window.scrollTo({top:0,behavior:'instant'});document.body.classList.remove('menu-open');}
+function navigate(to,params){if(to!=='lab'&&typeof stopLabAuto==='function')stopLabAuto();page=to;if(params){if(params.module)moduleId=params.module;if(params.lesson!==undefined)lessonId=params.lesson;if(params.challenge!==undefined)challengeId=params.challenge;}render();window.scrollTo({top:0,behavior:'instant'});document.body.classList.remove('menu-open');}
 function render(){updateHUD();document.querySelectorAll('[data-page]').forEach(btn=>btn.classList.toggle('active',btn.dataset.page===page));$('#crumbCurrent').textContent=titleMap[page];app.innerHTML=page==='home'?renderHome():page==='learn'?renderLearn():page==='lab'?renderLab():page==='practice'?renderPractice():page==='playground'?renderPlayground():renderRoadmap();}
 function renderHome(){const pct=Math.round(totalDone()/lessons.length*100);return '<div class="page"><div class="eyebrow">YOUR QUEST STARTS HERE · LEVEL '+(Math.floor(state.xp/250)+1)+'</div><section class="hero"><div><div class="tag green">✦ YOUR PERSONAL C++ ACADEMY</div><h1>Learn to think<br><span class="highlight">like an algorithm.</span></h1><p>Short lessons. Real code. Visual experiments. Play your way through Data Structures at UWI St. Augustine.</p><div class="actions"><button class="btn" data-action="start-learning">Continue learning →</button><button class="btn alt" data-page="lab">Try a visual lab ◎</button></div></div><div class="hero-art"><div class="node-graph"><div class="graph-line l1"></div><div class="graph-line l2"></div><div class="graph-line l3"></div><div class="graph-node n1">8</div><div class="graph-node n2">3</div><div class="graph-node n3">10</div><div class="graph-node n4">1</div></div></div></section><div class="stats"><div class="stat"><div class="lbl">XP EARNED</div><div class="value">✦ '+state.xp+'</div></div><div class="stat"><div class="lbl">LESSONS COMPLETE</div><div class="value">'+totalDone()+' <span class="muted" style="font-size:15px">/ '+lessons.length+'</span></div></div><div class="stat"><div class="lbl">CHALLENGES SOLVED</div><div class="value">'+totalSolved()+' <span class="muted" style="font-size:15px">/ '+challenges.length+'</span></div></div><div class="stat"><div class="lbl">STUDY STREAK</div><div class="value">⚡ '+state.streak+' <span class="muted" style="font-size:15px">days</span></div></div></div><div class="section-title"><h2>Your learning adventure</h2><span class="sub">'+pct+'% of current lessons complete</span></div><div class="progress-track"><div class="progress-fill" style="width:'+pct+'%"></div></div><div class="section-title"><h2>Choose your next move</h2></div><div class="cards"><article class="card click" data-page="learn"><div class="card-icon">▦</div><span class="tag green">60 INTERACTIVE LESSONS</span><h3 style="margin-top:15px">Learn the fundamentals</h3><p>Small lessons with examples, checkpoints and instant explanations.</p></article><article class="card click" data-page="lab"><div class="card-icon">◎</div><span class="tag">STEP-BY-STEP</span><h3 style="margin-top:15px">Watch algorithms move</h3><p>Manipulate arrays, stacks and binary search, one step at a time.</p></article><article class="card click" data-page="practice"><div class="card-icon">⚔</div><span class="tag pink">CODE CHALLENGES</span><h3 style="margin-top:15px">Get your hands dirty</h3><p>Write C++, test output and earn XP by solving missions.</p></article></div><div class="section-title"><h2>Your C++ workbench</h2></div><div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap"><div><h3>⌘ Open the playground</h3><p>Try code, supply standard input and keep virtual project files.</p></div><button class="btn purple" data-page="playground">Launch editor →</button></div></div>';}
 function renderLearn(){if(lessonId)return renderLesson();if(moduleId && state.showModule)return renderModule();return '<div class="page"><div class="eyebrow">CHAPTER SELECT</div><h1>Choose your <span class="highlight">path.</span></h1><p class="desc">14 topic tracks, organized from C++ basics to data structures and algorithm analysis. Includes '+lessons.length+' guided lessons with quick checks, code examples and explanations.</p><div class="path-grid">'+modules.map((m,i)=>{const ls=lessons.filter(l=>l.module===m.id),complete=ls.filter(l=>state.done[l.id]).length;return '<article class="card click path-card" data-module="'+m.id+'"><span class="path-number">'+m.icon+'</span><div class="path-meta"><div class="module-num">'+m.tag+' · '+complete+'/'+ls.length+' LESSONS</div><h3>'+escapeHTML(m.name)+'</h3><p>'+escapeHTML(m.blurb)+'</p><div class="progress-track"><div class="progress-fill" style="width:'+Math.round(100*complete/Math.max(1,ls.length))+'%"></div></div></div><span class="arrow">→</span></article>';}).join('')+'</div></div>';}
 function renderModule(){const m=modules.find(x=>x.id===moduleId)||modules[0],ls=lessons.filter(x=>x.module===m.id);return '<div class="page"><div class="lesson-top"><button class="back-button" data-action="all-modules">← All tracks</button><span class="tag">'+m.tag+'</span></div><div class="eyebrow">TRACK '+m.icon+'</div><h1>'+escapeHTML(m.name)+'</h1><p class="desc">'+escapeHTML(m.blurb)+'</p><div class="module-lessons">'+ls.map((l,i)=>'<div class="lesson-row" data-lesson="'+l.id+'"><div class="step-dot '+(state.done[l.id]?'complete':'')+'">'+(state.done[l.id]?'✓':i+1)+'</div><div class="lesson-main"><strong>'+escapeHTML(l.title)+'</strong><small>'+escapeHTML(l.subtitle)+'</small></div><span class="tag green">'+(state.done[l.id]?'COMPLETE':'30 XP')+'</span><span class="arrow">→</span></div>').join('')+'</div></div>';}
 function renderLesson(){const l=lessonFor(lessonId);if(!l){lessonId=null;return renderLearn();}const selected=state.answerSelections&&state.answerSelections[l.id];return '<div class="page lesson-panel"><div class="lesson-top"><button class="back-button" data-action="back-module">← '+escapeHTML(modules.find(m=>m.id===l.module).name)+'</button><span class="tag green">'+(state.done[l.id]?'✓ COMPLETED':'✦ 30 XP')+'</span></div><div class="eyebrow">FIELD GUIDE / '+escapeHTML(l.module.toUpperCase())+'</div><h1>'+escapeHTML(l.title)+'</h1><p class="desc">'+escapeHTML(l.subtitle)+'</p><div class="text-block"><h3>💡 The idea</h3><p>'+escapeHTML(l.body)+'</p><div class="callout"><strong>Try this:</strong> Read the code line by line. Predict what changes after each instruction before checking the answer.</div><div class="code-sample">'+escapeHTML(l.code)+'</div></div><div class="question"><div class="question-label">◈ KNOWLEDGE CHECK</div><h3>'+escapeHTML(l.question)+'</h3><div class="options">'+l.options.map((o,i)=>'<button class="option '+(selected!==undefined?(i===l.answer?'correct':i===selected?'wrong':''):'')+'" data-answer="'+i+'" '+(selected!==undefined?'disabled':'')+'>'+String.fromCharCode(65+i)+'. '+escapeHTML(o)+'</button>').join('')+'</div>'+(selected!==undefined?'<div class="feedback">'+(selected===l.answer?'✅ Correct. ':'💡 Keep going. ')+escapeHTML(l.why)+'</div>':'')+'</div><div class="actions"><button class="btn alt" data-page="lab">Explore visual lab ◎</button><button class="btn" data-action="next-lesson" '+(selected===undefined?'disabled':'')+'>Next lesson →</button></div></div>';}
 function framesFor(mode){
+ 
+if(mode==='linked'){
+  const data=[[],[8],[8,3],[8,3,5],[3,5],[3,5,9]];
+  return data.map((array,i)=>({array,focus:i?Math.min(array.length-1,Math.max(0,i-1)):-1,explain:['Start with an empty head pointer.','Insert 8 at the head.','Append 3 after 8.','Append 5 after 3.','Delete the head node 8; head now points to 3.','Append 9 and update the last next pointer.'][i]}));
+}
+if(mode==='queue'){
+  const data=[[],[2],[2,4],[2,4,8],[4,8],[4,8,6]];
+  return data.map((array,i)=>({array,focus:array.length-1,explain:['Queue begins empty.','enqueue(2): front and rear are 2.','enqueue(4): 2 remains the front.','enqueue(8): 8 becomes the rear.','dequeue(): remove front 2.','enqueue(6): 6 joins the rear.'][i]}));
+}
+if(mode==='tree'){
+  const seq=[1,3,6,8,10,14];
+  return [{array:[8,3,10,1,6,14],active:null,explain:'Inorder traversal: recursively visit left, then node, then right.'},...seq.map((active,i)=>({array:[8,3,10,1,6,14],active,visited:seq.slice(0,i+1),explain:'Visit '+active+'. Inorder so far: '+seq.slice(0,i+1).join(', ')}))];
+}
+if(mode==='heap'){
+  const steps=[
+    [[9,7,6,3,4],0,'Start with a valid max heap: every parent is ≥ its children.'],
+    [[9,7,6,3,4,8],5,'Insert 8 at the next free leaf position.'],
+    [[9,7,8,3,4,6],2,'8 is larger than its parent 6. Swap upward.'],
+    [[9,7,8,3,4],0,'Remove maximum 9. Move last item 6 to the root.'],
+    [[6,7,8,3,4],0,'Intermediate stage: root is now 6 (before heapify).'],
+    [[8,7,6,3,4],0,'Heapify by swapping 6 with larger child 8. Done.']
+  ];return steps.map(x=>({array:x[0],focus:x[1],explain:x[2]}));
+}
+if(mode==='hash'){
+  const keys=[14,20,6,13],buckets=[[],[],[],[],[],[],[]],steps=[{buckets:buckets.map(x=>[...x]),explain:'Insert keys using h(key) = key % 7; each bucket uses chaining.'}];
+  for(const key of keys){const b=key%7;buckets[b].push(key);steps.push({buckets:buckets.map(x=>[...x]),active:b,explain:'Hash '+key+' → '+b+'. '+(buckets[b].length>1?'Collision! Add to bucket '+b+' chain.':'Bucket '+b+' receives '+key+'.')});}
+  return steps;
+}
+if(mode==='graph'||mode==='dfs'){
+  const order=mode==='graph'?['A','B','C','D','E']:['A','B','D','C','E'];
+  const method=mode==='graph'?'Breadth-first (queue)':'Depth-first (stack)';
+  return [{visited:[],active:null,explain:method+' begins at A.'},...order.map((active,i)=>({visited:order.slice(0,i+1),active,explain:'Visit '+active+'. Order so far: '+order.slice(0,i+1).join(' → ')}))];
+}
+if(mode==='dijkstra'){
+  const states=[
+    ['A',{A:0,B:'∞',C:'∞',D:'∞',E:'∞'},'Initialize source A with distance 0. Others are infinity.'],
+    ['A',{A:0,B:4,C:1,D:'∞',E:'∞'},'Relax edges from A: B=4, C=1.'],
+    ['C',{A:0,B:3,C:1,D:6,E:'∞'},'Settle C. Relax C→B: 1+2=3, C→D: 1+5=6.'],
+    ['B',{A:0,B:3,C:1,D:4,E:'∞'},'Settle B. B→D gives 3+1=4.'],
+    ['D',{A:0,B:3,C:1,D:4,E:7},'Settle D. D→E gives 4+3=7.'],
+    ['E',{A:0,B:3,C:1,D:4,E:7},'Settle E. Shortest path A→C→B→D→E costs 7.']
+  ];return states.map(x=>({active:x[0],dist:x[1],explain:x[2]}));
+}
+if(mode==='recursion'){
+  const data=[['sum(4)'],['sum(4)','sum(3)'],['sum(4)','sum(3)','sum(2)'],['sum(4)','sum(3)','sum(2)','sum(1)'],['sum(4)','sum(3)','sum(2)','sum(1)','sum(0)'],['sum(4)','sum(3)','sum(2)'],['sum(4)','sum(3)'],['sum(4)'],[]];
+  return data.map((stack,i)=>({stack,explain:['Call sum(4).','sum(4) waits for sum(3).','sum(3) waits for sum(2).','sum(2) waits for sum(1).','Base case sum(0)=0; no more calls.','Return 1 to sum(2).','Return 3 to sum(3).','Return 6 to sum(4).','Return 10. Call stack is empty.'][i]}));
+}
+if(mode==='merge'){
+  const data=[[],[1],[1,2],[1,2,3],[1,2,3,4],[1,2,3,4,7],[1,2,3,4,7,8]];
+  return data.map((array,i)=>({array,focus:i-1,explain:i?'Take next smallest remaining item: '+array[array.length-1]+'.':'Merge sorted halves [1,4,8] and [2,3,7] into one result.'}));
+}
+if(mode==='quick'){
+  const steps=[
+   [[7,2,9,5,1],3,'Choose 5 as pivot. Partition smaller keys left, larger keys right.'],
+   [[2,7,9,5,1],0,'Move 2 into the left partition.'],
+   [[2,1,9,5,7],1,'Move 1 into the left partition.'],
+   [[2,1,5,9,7],2,'Place pivot 5 at its final index.'],
+   [[1,2,5,7,9],2,'Recursively sort both partitions. Done.']
+  ];return steps.map(x=>({array:x[0],focus:x[1],explain:x[2]}));
+}
+
 if(mode==='stack'){const items=[[],[4],[4,8],[4,8,2],[4,8],[4,8,9],[4,8]];const labels=['Empty stack — nothing to pop.','push(4) — 4 becomes the top.','push(8) — 8 becomes the top.','push(2) — 2 becomes the top.','pop() — remove 2.','push(9) — 9 becomes the top.','pop() — remove 9.'];return items.map((a,i)=>({array:a,focus:a.length-1,explain:labels[i]}));}
 if(mode==='binary'){const arr=[2,4,6,8,10,12,14,16,18],out=[],target=14;let left=0,right=arr.length-1;while(left<=right){let mid=Math.floor((left+right)/2);out.push({array:arr,focus:mid,explain:'Range ['+left+'..'+right+']. Middle index '+mid+' holds '+arr[mid]+'. '+(arr[mid]===target?'Target found!':arr[mid]<target?'Go right.':'Go left.')});if(arr[mid]===target)break;if(arr[mid]<target)left=mid+1;else right=mid-1;}return out;}
 let a=[7,3,9,1,5],steps=[{array:[...a],focus:-1,explain:'Bubble sort: compare adjacent items and swap those out of order.'}];for(let i=0;i<a.length-1;i++){let changed=false;for(let j=0;j<a.length-1-i;j++){steps.push({array:[...a],focus:j,focus2:j+1,explain:'Compare '+a[j]+' and '+a[j+1]+'. '+(a[j]>a[j+1]?'Swap them.':'Keep the order.')});if(a[j]>a[j+1]){[a[j],a[j+1]]=[a[j+1],a[j]];changed=true;steps.push({array:[...a],focus:j,focus2:j+1,explain:'Swapped! The larger value moves right.'});}}if(!changed)break;}steps.push({array:[...a],focus:-1,explain:'Sorted! Bubble sort has worst-case O(n²) time.'});return steps;
 }
-function renderLab(){const labels={array:'Bubble sort',stack:'Stack operations',binary:'Binary search'},frames=framesFor(labMode),fr=frames[Math.min(labStep,frames.length-1)];return '<div class="page"><div class="eyebrow">INTERACTIVE VISUALIZERS</div><h1>See the <span class="highlight">logic.</span></h1><p class="desc">Move through the algorithm like a flipbook. Track exactly what changes at each step.</p><div class="lab-layout"><div class="lab-panel"><h3>Experiments</h3><p class="muted" style="font-size:13px">Choose a structure.</p><div class="lab-select">'+Object.keys(labels).map(k=>'<button class="lab-mode '+(labMode===k?'active':'')+'" data-lab="'+k+'">'+(k==='array'?'◈ ':k==='stack'?'▤ ':'⌕ ')+labels[k]+'</button>').join('')+'</div><div class="note">These demos use fixed example values so you can follow each operation. More visual labs are planned.</div></div><div class="lab-panel"><div class="challenge-head"><h2>'+labels[labMode]+'</h2><span class="tag green">STEP '+(labStep+1)+' / '+frames.length+'</span></div><div class="viz-stage">'+(fr.array.length?fr.array.map((v,i)=>'<div class="array-node '+(i===fr.focus||i===fr.focus2?'focus':'')+'">'+v+'<span>'+ (labMode==='stack'?(i===fr.array.length-1?'TOP':'node '+i):'['+i+']')+'</span></div>').join(''):'<span class="muted">EMPTY STACK</span>')+'</div><div class="viz-explain">'+escapeHTML(fr.explain)+'</div><div class="viz-controls" style="margin-top:18px"><button class="btn alt" data-action="lab-prev" '+(labStep===0?'disabled':'')+'>← Previous</button><button class="btn" data-action="lab-next" '+(labStep>=frames.length-1?'disabled':'')+'>Next step →</button><button class="btn outline" data-action="lab-reset">↻ Reset</button></div><div class="note">Watch the highlighted items: green means the algorithm is working with these values now.</div></div></div></div>';}
+
+const labLabels={array:'Bubble sort',stack:'Stack operations',binary:'Binary search',linked:'Linked list',queue:'Circular queue',tree:'Tree traversal',heap:'Heap operations',hash:'Hash collisions',graph:'Graph BFS',dfs:'Graph DFS',dijkstra:'Dijkstra paths',recursion:'Recursion stack',merge:'Merge sort',quick:'Quick sort'};
+let labTimer=null;
+function stopLabAuto(){if(labTimer!==null){clearInterval(labTimer);labTimer=null;}}
+function labSVG(mode,fr){
+  const tree=mode==='tree'||mode==='heap';
+  const nodes=tree?fr.array.map((v,i)=>({v:String(v),x:i===0?300:i===1?160:i===2?440:i===3?90:i===4?230:i===5?370:510,y: i===0?45:i<3?118:195})):
+    [{v:'A',x:105,y:110},{v:'B',x:250,y:45},{v:'C',x:250,y:180},{v:'D',x:405,y:62},{v:'E',x:505,y:180}];
+  const edges=tree?nodes.slice(1).map((_,i)=>[Math.floor((i+1-1)/2),i+1,'']):
+    [[0,1,'4'],[0,2,'1'],[1,2,'2'],[1,3,'1'],[2,3,'5'],[3,4,'3']];
+  const lines=edges.map(([a,b,w])=>'<line x1="'+nodes[a].x+'" y1="'+nodes[a].y+'" x2="'+nodes[b].x+'" y2="'+nodes[b].y+'" stroke="#44627e" stroke-width="3"/>'+(mode==='dijkstra'?'<text x="'+((nodes[a].x+nodes[b].x)/2)+'" y="'+((nodes[a].y+nodes[b].y)/2-8)+'" fill="#a8f063" font-size="13">'+w+'</text>':'')).join('');
+  const circles=nodes.map(n=>{const isActive=tree?(fr.active===Number(n.v)||fr.focus===fr.array.indexOf(Number(n.v))):fr.active===n.v;const visited=fr.visited&&fr.visited.includes(tree?Number(n.v):n.v);return '<g><circle cx="'+n.x+'" cy="'+n.y+'" r="24" fill="'+(isActive?'#a8f063':visited?'#275c58':'#1a2a43')+'" stroke="'+(isActive?'#caff91':'#6886aa')+'" stroke-width="2"/><text x="'+n.x+'" y="'+(n.y+6)+'" text-anchor="middle" font-family="monospace" font-size="18" font-weight="bold" fill="'+(isActive?'#102414':'#eaf2ff')+'">'+n.v+'</text></g>';}).join('');
+  const distances=mode==='dijkstra'&&fr.dist?'<text x="300" y="250" text-anchor="middle" fill="#bfcde2" font-size="14">Distances: '+Object.entries(fr.dist).map(([k,v])=>k+'='+v).join('  ·  ')+'</text>':'';
+  return '<svg class="viz-svg" role="img" aria-label="'+(tree?'Binary tree diagram':'Graph diagram')+'" viewBox="0 0 600 265">'+lines+circles+distances+'</svg>';
+}
+function labVisual(fr,mode){
+  if(mode==='tree'||mode==='heap'||mode==='graph'||mode==='dfs'||mode==='dijkstra')return labSVG(mode,fr);
+  if(mode==='hash')return '<div class="hash-grid">'+fr.buckets.map((bucket,i)=>'<div class="hash-row '+(fr.active===i?'focus':'')+'"><span class="hash-index">h = '+i+'</span><span>'+(bucket.length?bucket.join(' → '):'empty')+'</span></div>').join('')+'</div>';
+  if(mode==='recursion')return '<div class="stack-frame">'+(fr.stack.length?fr.stack.slice().reverse().map((v,i)=>'<div class="stack-call '+(i===0?'focus':'')+'">'+v+'</div>').join(''):'<span class="muted">Stack empty. sum(4) returns 10.</span>')+'</div>';
+  if(mode==='linked'||mode==='queue')return fr.array.length?'<div class="linked-stage">'+fr.array.map((v,i)=>'<div class="linked-block"><span class="linked-label">'+(mode==='queue'?(i===0?'FRONT':i===fr.array.length-1?'REAR':'NODE '+i):(i===0?'HEAD':'NODE '+i))+'</span><div class="linked-cell '+(i===fr.focus?'focus':'')+'">'+v+'</div></div>'+(i<fr.array.length-1?'<div class="linked-arrow">→</div>':'<div class="linked-arrow">→ ∅</div>')).join('')+'</div>':'<span class="muted">Empty '+(mode==='queue'?'queue':'list')+'</span>';
+  return fr.array.length?fr.array.map((v,i)=>'<div class="array-node '+(i===fr.focus||i===fr.focus2?'focus':'')+'">'+v+'<span>'+(mode==='stack'?(i===fr.array.length-1?'TOP':'node '+i):'['+i+']')+'</span></div>').join(''):'<span class="muted">Empty</span>';
+}
+function renderLab(){
+  const frames=framesFor(labMode),fr=frames[Math.min(labStep,frames.length-1)];
+  return '<div class="page"><div class="eyebrow">INTERACTIVE VISUALIZERS</div><h1>See the <span class="highlight">logic.</span></h1><p class="desc">Step through C++ data structures and algorithms. Follow changes in memory, ordering and graph visits.</p><div class="lab-layout"><div class="lab-panel"><h3>Choose an experiment</h3><div class="lab-select">'+Object.keys(labLabels).map((k,i)=>'<button class="lab-mode '+(labMode===k?'active':'')+'" data-lab="'+k+'"><span class="lab-num">'+String(i+1).padStart(2,'0')+'</span> '+labLabels[k]+'</button>').join('')+'</div><div class="note">Tip: predict the next change before pressing Next step. Use Auto play to watch the operation unfold.</div></div><div class="lab-panel"><div class="challenge-head"><h2>'+labLabels[labMode]+'</h2><span class="tag green">STEP '+(labStep+1)+' / '+frames.length+'</span></div><div class="viz-stage">'+labVisual(fr,labMode)+'</div><div class="viz-explain">'+escapeHTML(fr.explain)+'</div><div class="progress-track"><div class="progress-fill" style="width:'+Math.round((labStep+1)/frames.length*100)+'%"></div></div><div class="viz-controls" style="margin-top:18px"><button class="btn alt" data-action="lab-prev" '+(labStep===0?'disabled':'')+'>← Previous</button><button class="btn" data-action="lab-next" '+(labStep>=frames.length-1?'disabled':'')+'>Next step →</button><button class="btn outline" data-action="lab-auto">'+(labTimer===null?'▶ Auto play':'⏸ Pause')+'</button><button class="btn outline" data-action="lab-reset">↻ Reset</button></div><div class="note">Highlighted values mark the current operation; colored graph vertices show visits.</div></div></div></div>';
+}
 function renderPractice(){if(challengeId)return renderChallenge();const categories=['All',...new Set(challenges.map(c=>c.category))],filtered=challenges.filter(c=>challengeFilter==='All'||challengeFilter===c.category);return '<div class="page"><div class="eyebrow">SKILL BUILDER / CODE GYM</div><h1>Prove it with <span class="highlight">code.</span></h1><p class="desc">Write C++ yourself and check the output against a sample case. Passing a sample is a milestone; new missions also check extra hidden cases.</p><div class="filter-tabs">'+categories.map(c=>'<button data-filter="'+c+'" class="tab-button '+(challengeFilter===c?'active':'')+'">'+c+'</button>').join('')+'</div><div class="challenge-list">'+filtered.map((c,i)=>'<article class="challenge-item" data-challenge="'+c.id+'"><div><div class="tag '+(state.solved[c.id]?'green':'')+'">'+(state.solved[c.id]?'✓ SOLVED':'✦ 50 XP')+'</div><h3 style="margin-top:11px">'+escapeHTML(c.title)+'</h3><p>'+escapeHTML(c.desc)+'</p></div><div style="text-align:right;flex:none"><span class="tag">'+c.category.toUpperCase()+'</span><div style="color:var(--lime);font-size:25px;margin-top:8px">→</div></div></article>').join('')+'</div></div>';}
 function renderChallenge(){const c=challengeFor(challengeId);if(!c){challengeId=null;return renderPractice();}const code=state.practiceCode[c.id]===undefined?c.starter:state.practiceCode[c.id];return '<div class="page"><div class="lesson-top"><button class="back-button" data-action="back-practice">← All challenges</button><span class="tag pink">'+c.category.toUpperCase()+'</span></div><div class="eyebrow">CODE MISSION / '+(challenges.findIndex(x=>x.id===c.id)+1).toString().padStart(2,'0')+'</div><h1>'+escapeHTML(c.title)+'</h1><div class="challenge-brief"><h3>Your mission</h3><p>'+escapeHTML(c.desc)+'</p><div class="kv">SAMPLE INPUT</div><pre>'+escapeHTML(c.input||'(none)')+'</pre><div class="kv">EXPECTED OUTPUT</div><pre>'+escapeHTML(c.expected)+'</pre><details style="margin-top:18px"><summary class="muted" style="cursor:pointer">Need a hint?</summary><p>'+escapeHTML(c.hint)+'</p></details></div>'+editorMarkup(code,true)+'<p class="note">The judge checks the sample and, where included, extra test cases. The browser interpreter supports a C++ subset; use the optional local compiler for full C++.</p></div>';}
 function editorMarkup(code,isChallenge){return '<div class="editor-grid"><section class="editor-box"><div class="editor-top"><span><span class="file-dot"></span>'+(isChallenge?'solution.cpp':'main.cpp')+'</span><span class="muted">C++ · '+(fullRunnerUrl()?'full compiler':'browser interpreter')+'</span></div><textarea class="editor" id="codeEditor" spellcheck="false" aria-label="C++ code editor">'+escapeHTML(code)+'</textarea><div class="editor-tools"><span class="muted" style="font:11px var(--mono)">Ctrl/⌘ + Enter to run</span><div class="actions" style="margin:0"><button class="btn alt small" data-action="reset-code">↻ Reset</button><button class="btn small" data-action="run-code" id="runButton">▶ '+(isChallenge?'Run & check':'Run code')+'</button></div></div></section><section class="terminal-box"><div class="terminal-head"><span>⌁ TERMINAL / OUTPUT</span><span class="status" id="runnerStatus">'+consoleStatus+'</span></div><pre class="terminal-output" id="runnerOutput">'+escapeHTML(consoleText)+'</pre><div style="padding:0 14px 16px"><label for="stdin" class="form-label">STANDARD INPUT (stdin)</label><textarea class="field" id="stdin" rows="2" placeholder="Enter input separated by spaces or lines...">'+escapeHTML(isChallenge?challengeFor(challengeId).input:state.stdin)+'</textarea>'+(isChallenge?'':'<div class="actions" style="margin-top:9px"><button class="btn alt small" data-action="load-input">Load input.txt</button><button class="btn alt small" data-action="save-output">Save output.txt</button></div>')+'</div></section></div>';}
@@ -242,7 +328,7 @@ const nav=e.target.closest('[data-page]');if(nav){navigate(nav.dataset.page);ret
 const module=e.target.closest('[data-module]');if(module){moduleId=module.dataset.module;lessonId=null;state.showModule=true;navigate('learn');return;}
 const lesson=e.target.closest('[data-lesson]');if(lesson){lessonId=lesson.dataset.lesson;state.showModule=true;navigate('learn');return;}
 const ch=e.target.closest('[data-challenge]');if(ch){challengeId=ch.dataset.challenge;consoleText='Write a solution, then run the sample test.';consoleStatus='READY';navigate('practice');return;}
-const mode=e.target.closest('[data-lab]');if(mode){labMode=mode.dataset.lab;labStep=0;render();return;}
+const mode=e.target.closest('[data-lab]');if(mode){stopLabAuto();labMode=mode.dataset.lab;labStep=0;render();return;}
 const filter=e.target.closest('[data-filter]');if(filter){challengeFilter=filter.dataset.filter;render();return;}
 const file=e.target.closest('[data-file]');if(file){state.activeFile=file.dataset.file;save();render();return;}
 const ans=e.target.closest('[data-answer]');if(ans&&lessonId){const l=lessonFor(lessonId);state.answerSelections=state.answerSelections||{};if(state.answerSelections[l.id]!==undefined)return;const answer=Number(ans.dataset.answer);if(answer!==l.answer){toast('Not quite. Hint: '+l.why);return;}state.answerSelections[l.id]=answer;if(!state.done[l.id]){state.done[l.id]=true;award(30);}save();render();return;}
@@ -251,9 +337,22 @@ if(a==='start-learning'){const next=lessons.find(l=>!state.done[l.id])||lessons[
 if(a==='all-modules'){state.showModule=false;lessonId=null;render();}
 if(a==='back-module'){lessonId=null;state.showModule=true;render();}
 if(a==='next-lesson'){const index=lessons.findIndex(l=>l.id===lessonId),next=lessons[index+1];if(next){lessonId=next.id;moduleId=next.module;render();window.scrollTo(0,0);}else{lessonId=null;state.showModule=false;render();}}
-if(a==='lab-next'){labStep=Math.min(labStep+1,framesFor(labMode).length-1);render();}
-if(a==='lab-prev'){labStep=Math.max(labStep-1,0);render();}
-if(a==='lab-reset'){labStep=0;render();}
+if(a==='lab-next'){stopLabAuto();labStep=Math.min(labStep+1,framesFor(labMode).length-1);render();}
+if(a==='lab-prev'){stopLabAuto();labStep=Math.max(labStep-1,0);render();}
+if(a==='lab-reset'){stopLabAuto();labStep=0;render();}
+if(a==='lab-auto'){
+  if(labTimer!==null){stopLabAuto();render();}
+  else{
+    if(labStep>=framesFor(labMode).length-1)labStep=0;
+    labTimer=setInterval(()=>{
+      if(page!=='lab'){stopLabAuto();return;}
+      labStep++;
+      if(labStep>=framesFor(labMode).length-1){labStep=framesFor(labMode).length-1;stopLabAuto();}
+      render();
+    },1000);
+    render();
+  }
+}
 if(a==='back-practice'){challengeId=null;render();}
 if(a==='run-code')await runEditor();
 if(a==='save-runner-url'){
