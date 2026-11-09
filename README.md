@@ -1,49 +1,54 @@
 # DSA Quest: Code Academy
 
-Learn it. Visualize it. Code it. Master it.
+A game-inspired, responsive **C++ Data Structures & Algorithms academy** built for independent study alongside **UWI St. Augustine COMP 2611**. No payment, account or login is needed.
 
-An independent, game-inspired learning space for UWI St. Augustine COMP 2611 — Data Structures, using C++.
+## What you can do
 
-## First release
+- Learn through **61 guided lessons** in **14 tracks**, from basic C++, pointers, linked lists and recursion to trees, BST/AVL trees, heaps, hashing, BFS/DFS, Dijkstra, sorting, matrices, algorithm analysis and proofs. Each lesson has an example, a question, feedback and XP.
+- Explore **14 interactive visual labs**. Move one step at a time or use auto-play. Labs include pointer-based lists, queue operations, stack operations, recursion, heaps, hashing, trees, BFS/DFS, Dijkstra and sorting.
+- Work through **24 C++ coding missions** with hints, sample I/O, a code editor, an output terminal, automatic checks and extra cases for recent missions.
+- Use the **Playground** to edit C++, provide standard input, maintain several virtual files, import text files, export a backup, and keep progress and XP in browser storage.
+- Connect the **optional local full C++17 compiler** for STL, multiple .cpp files, and real \`std::ifstream\`/\`std::ofstream\` I/O with files in the virtual workspace.
 
-- Command center with XP, a study streak, and saved progress.
-- 14 topic tracks and 20 interactive lessons with code examples and retriable quiz checkpoints.
-- Three visual labs: bubble sort, stack operations and binary search.
-- Code Gym with seven sample-based C++ coding challenges, hints and instant feedback.
-- C++ playground: source editor, stdin entry, stdout terminal, and an execution time limit.
-- Virtual file workspace: create, edit, import and download files; save output; export and restore JSON project data.
-- Responsive dark interface designed for desktop, tablet and mobile.
+## Start now
 
-## Publish
+Open \`index.html\` in a browser, or use the GitHub Pages deployment when enabled:
 
-Under the GitHub repository Settings → Pages, select Deploy from a branch, choose main and /(root), and Save. After Pages has been enabled and published, the expected URL is:
+**https://lano07.github.io/DSA-Quest_UWI/**
 
-https://lano07.github.io/DSA-Quest_UWI/
+If the site returns 404, open **GitHub → Repository Settings → Pages → Build and deployment → Source: GitHub Actions**. The included deployment workflow publishes from the main branch. Wait for the "Publish DSA Quest to GitHub Pages" action to finish.
 
-Until Pages is enabled, that URL may not work. You can view index.html locally in a modern browser.
+The browser interpreter is **JSCPP**, an educational subset of C++, loaded when you first run code. It does **not** compile general C++17, STL, multiple files or \`fstream\`. Do not confuse passing a small sample with a complete program correctness proof.
 
-## C++ runner limits
+### Full C++17 and file I/O (optional)
 
-The Run button uses the open-source JSCPP educational interpreter loaded from a CDN inside a Web Worker: https://github.com/felixhao28/JSCPP
+Read [backend/README.md](backend/README.md). Install Docker and Node.js, then:
 
-Supported examples cover a subset of C++ such as simple arithmetic, arrays, loops, pointers, functions, recursion and standard input/output. A full compiler, modern STL, full standard libraries, fstream file access, multi-file builds and arbitrary OS filesystem operations are NOT supported yet. The terminal shows program output; it is not a full operating-system shell.
+\`\`\`bash
+docker pull gcc:14
+node backend/server.mjs
+\`\`\`
 
-Virtual files live in browser local storage. They can be edited and downloaded, or their contents loaded as stdin. They are not available to C++ as actual files. The Code Gym currently checks sample output only, not a complete hidden test suite.
+Visit **http://127.0.0.1:8787** for the full C++ playground. Virtual files are copied into an isolated temporary working directory and returned after execution; the program **cannot access arbitrary host files**. The server is local-only and should not be publicly exposed. GitHub Pages cannot run a server by itself.
 
-The interpreter requires a network connection to load. If the interpreter or Worker cannot load, the app reports an error. Progress is local to the browser, not synced across devices.
+## Quality checks
 
-## Roadmap and references
+With Node.js 20+:
 
-The course map covers pointers and arrays, linked lists, stacks and queues, recursion, binary trees and search trees, heaps, hashing, graphs, graph algorithms, sorting and searching, complexity, and some additional mathematical theory. This release is a starting implementation rather than the full UWI course.
+\`\`\`bash
+node --check app.js
+node --check backend/server.mjs
+node tests/smoke.mjs
+\`\`\`
 
-UWI COMP 2611 course information: https://sta.uwi.edu/fst/dcit/content/comp-2611
+These are structural smoke checks, not an end-to-end browser or Docker runtime test.
 
-Planned later: deeper lesson packs, richer visualizers and editors, real sandboxed C++ project compilation, full file I/O and robust automated judge.
+## Course mapping
 
-## Files
+Based on the public [UWI St. Augustine COMP 2611 course description](https://sta.uwi.edu/fst/dcit/content/comp-2611), which specifically names stacks, queues, linked lists, binary trees, heaps and graphs. Topics such as Dijkstra, AVL trees, advanced sorting and special matrices provide deeper study; use your current lecturer's notes and semester syllabus for exact assessment scope.
 
-- index.html — page structure
-- style.css — interface design
-- app.js — content, visual labs, challenges and browser workspace
+**Independent project:** not affiliated with Codédex or UWI. Its game-based format is original rather than a copy of Codédex's artwork, branding or assets.
 
-Independent project. Not affiliated with Codédex or The University of the West Indies.
+## Privacy & data
+
+Progress and workspace text are stored in the browser's localStorage, not on an account. Clearing browser storage removes them unless you export the project first. Code run by the in-browser interpreter stays local except that the interpreter script is fetched from the CDN. Full C++ code and virtual files are sent to the compiler endpoint you configure.
