@@ -8,10 +8,13 @@
   <title>DSA Quest · Code Academy</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Press+Start+2P&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./extras.css">
+  <link rel="stylesheet" href="./adventure.css">
   <script defer src="./app.js"></script>
+  <script defer src="./adventure-data.js"></script>
+  <script defer src="./adventure.js"></script>
 </head>
 <body>
 <div class="shell">
@@ -19,8 +22,9 @@
     <a class="brand" href="#home" aria-label="DSA Quest home"><span class="brand-symbol">⌘</span><span>DSA<span class="brand-accent">QUEST</span><small>CODE ACADEMY</small></span></a>
     <div class="sidebar-label">THE ACADEMY</div>
     <nav class="nav" aria-label="Main navigation">
-      <button data-page="home" class="nav-item active"><span class="ni">◈</span> Command center</button>
-      <button data-page="learn" class="nav-item"><span class="ni">▦</span> Learning path <span class="nav-pill">14</span></button>
+      <button data-page="home" class="nav-item active"><span class="ni">⌂</span> Home base</button>
+      <button data-page="quest" class="nav-item"><span class="ni">✦</span> The Adventure <span class="nav-pill">35</span></button>
+      <button data-page="learn" class="nav-item"><span class="ni">▦</span> Theory library <span class="nav-pill">61</span></button>
       <button data-page="lab" class="nav-item"><span class="ni">◎</span> Visual labs</button>
       <button data-page="practice" class="nav-item"><span class="ni">⚔</span> Code challenges</button>
       <button data-page="boss" class="nav-item"><span class="ni">♛</span> Boss arena</button>
@@ -28,7 +32,7 @@
     </nav>
     <div class="sidebar-label second-label">RESOURCES</div>
     <nav class="nav" aria-label="Resources"><button data-page="roadmap" class="nav-item"><span class="ni">▤</span> COMP 2611 roadmap</button></nav>
-    <div class="sidebar-bottom"><div class="side-badge">✦ <strong>LEARN BY DOING</strong></div><p>From zero confidence to clear thinking. One mission at a time.</p><div class="side-note">An independent learning project for UWI St. Augustine. Not affiliated with Codédex or UWI.</div></div>
+    <div class="sidebar-bottom"><div class="side-badge">✦ <strong>LEARN BY DOING</strong></div><p>Learn the idea. Write the code. Watch it work.</p><div class="side-note">An independent learning project for UWI St. Augustine. Not affiliated with Codédex or UWI.</div></div>
   </aside>
   <div class="main-col">
     <header class="topbar">
@@ -37,7 +41,7 @@
       <div class="top-right"><span class="streak">⚡ <strong id="streakTop">0</strong> DAY STREAK</span><span class="xp-chip">✦ <strong id="xpTop">0</strong> XP</span><span class="avatar">L</span></div>
     </header>
     <main id="app" tabindex="-1" aria-live="polite"></main>
-    <footer class="footer">DSA Quest · Code Academy <span>Built for curious minds and COMP 2611.</span></footer>
+    <footer class="footer">DSA Quest · Code Academy <span>35 playable missions • COMP 2611 • Created for your C++ practice.</span></footer>
   </div>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
