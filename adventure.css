@@ -234,3 +234,18 @@ body.aq-mission-active #app{width:100%;max-width:100%;overflow:visible}
 
 .aq-visual-link{margin:3px 0 0;display:inline-flex;gap:12px;align-items:center;justify-content:space-between;background:#1b3341;border:1px solid #3e8799;border-radius:7px;color:#a8eff9;padding:11px 15px;font:700 11px var(--aq-mono);cursor:pointer;transition:background .14s}
 .aq-visual-link span{font-size:17px}.aq-visual-link:hover{background:#264c5b;border-color:#72dcec}
+
+/* Collectible chapter badges */
+.aq-badge-shelf{margin:44px 0 10px;background:#121b31;border:1px solid #394760;border-radius:15px;padding:22px 24px}
+.aq-badge-shelf .aq-section-heading{margin:0 0 21px}
+.aq-badge-count{font:700 11px var(--aq-mono);color:#b9d6a4}
+.aq-badge-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:13px}
+.aq-badge{min-width:0;min-height:142px;text-align:center;padding:15px 8px;background:#172038;border:1px solid #3b4863;border-radius:11px;display:flex;align-items:center;flex-direction:column}
+.aq-badge-art{height:62px;width:62px;border:2px solid #4c5b7b;background:#242e46;border-radius:50%;display:grid;place-items:center;color:#7082a4;font-size:31px;margin-bottom:11px}
+.aq-badge strong{font:700 11px/1.45 var(--display);color:#bac6df}
+.aq-badge small{color:#7185a9;font:600 9px/1.6 var(--aq-mono);margin-top:5px}
+.aq-badge.won{border-color:#769c52;background:#1d312e}
+.aq-badge.won .aq-badge-art{background:#344b36;border-color:var(--aq-lime);box-shadow:0 0 20px #b8f66e1c;color:var(--aq-yellow)}
+.aq-badge.won strong{color:#edffe6}.aq-badge.won small{color:var(--aq-lime)}
+@media(max-width:1150px){.aq-badge-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:740px){.aq-badge-shelf{padding:16px 12px}.aq-badge-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}}
