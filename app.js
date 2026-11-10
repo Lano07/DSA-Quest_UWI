@@ -133,9 +133,9 @@ const lessonFor=id=>lessons.find(l=>l.id===id);
 const challengeFor=id=>challenges.find(l=>l.id===id);
 const totalDone=()=>Object.keys(state.done).filter(k=>state.done[k]).length;
 const totalSolved=()=>Object.keys(state.solved).filter(k=>state.solved[k]).length;
-const titleMap={home:'Command center',learn:'Learning path',lab:'Visual labs',practice:'Code challenges',boss:'Boss arena',playground:'C++ playground',roadmap:'COMP 2611 roadmap'};
+const titleMap={home:'Welcome, adventurer',quest:'The adventure',learn:'Theory library',lab:'Visual labs',practice:'Code challenges',boss:'Boss arena',playground:'C++ playground',roadmap:'COMP 2611 roadmap'};
 function navigate(to,params){if(to!=='lab'&&typeof stopLabAuto==='function')stopLabAuto();page=to;if(params){if(params.module)moduleId=params.module;if(params.lesson!==undefined)lessonId=params.lesson;if(params.challenge!==undefined)challengeId=params.challenge;}render();window.scrollTo({top:0,behavior:'instant'});document.body.classList.remove('menu-open');}
-function render(){updateHUD();document.querySelectorAll('[data-page]').forEach(btn=>btn.classList.toggle('active',btn.dataset.page===page));$('#crumbCurrent').textContent=titleMap[page];app.innerHTML=page==='home'?renderHome():page==='learn'?renderLearn():page==='lab'?renderLab():page==='practice'?renderPractice():page==='boss'?renderBoss():page==='playground'?renderPlayground():renderRoadmap();}
+function render(){updateHUD();document.querySelectorAll('[data-page]').forEach(btn=>btn.classList.toggle('active',btn.dataset.page===page));$('#crumbCurrent').textContent=titleMap[page]||'The adventure';const enhanced=window.DSAAdventure&&window.DSAAdventure.renderPage(page);app.innerHTML=enhanced!==null&&enhanced!==undefined?enhanced:(page==='home'?renderHome():page==='learn'?renderLearn():page==='lab'?renderLab():page==='practice'?renderPractice():page==='boss'?renderBoss():page==='playground'?renderPlayground():renderRoadmap());document.body.classList.toggle('aq-mission-active',Boolean(page==='quest'&&window.DSAAdventure&&window.DSAAdventure.activeMission()));document.body.classList.toggle('aq-home-active',page==='home');}
 
 let bossState=null;
 function startBoss(){
@@ -431,5 +431,6 @@ document.addEventListener('click',e=>{const n=e.target.closest('.sidebar [data-p
 $('#menuToggle').addEventListener('click',()=>document.body.classList.toggle('menu-open'));
 window.addEventListener('hashchange',()=>{const hash=location.hash.replace('#','');if(titleMap[hash])navigate(hash);});
 if(titleMap[location.hash.replace('#','')])page=location.hash.replace('#','');
+window.DSAQuestBridge={state,chapters:modules,lessons,challenges,award,save,toast,navigate,render,executeCPP,escapeHTML,fullRunnerUrl};
 render();
 })();
