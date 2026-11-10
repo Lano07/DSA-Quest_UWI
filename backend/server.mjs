@@ -57,7 +57,8 @@ async function compileAndRun(request){
     const files={...incoming,'main.cpp':code};
     for(const [name,content] of Object.entries(files)){
       if(!VALID_NAME.test(name)||name.startsWith('.')||typeof content!=='string'||content.length>160000)throw Object.assign(new Error('Invalid virtual file: '+name),{status:400});
-      await writeFile(join(dir,name),content,{mode:0o644,flag:'w'});
+      await writeFile(join(dir,name),content,{mode:0o666,flag:'w'});
+      await chmod(join(dir,name),0o666); // isolated virtual workspace must be writable by the container user
     }
     await writeFile(join(dir,'.stdin'),stdin,{mode:0o644});
     const command = [
@@ -108,7 +109,7 @@ const server=http.createServer(async(req,res)=>{
       finally{active--;}
     }
     if(req.method!=='GET')return json(res,405,{error:'Method not supported'});
-    const files={'/':'index.html','/index.html':'index.html','/app.js':'app.js','/style.css':'style.css'};
+    const files={'/':'index.html','/index.html':'index.html','/app.js':'app.js','/style.css':'style.css','/extras.css':'extras.css','/adventure.css':'adventure.css','/adventure-data.js':'adventure-data.js','/adventure-solutions.js':'adventure-solutions.js','/adventure.js':'adventure.js'};
     if(!Object.hasOwn(files,path))return json(res,404,{error:'Not found'});
     const filename=files[path],data=await readFile(join(ROOT,filename));
     res.writeHead(200,{'Content-Type':MIME[extname(filename)]||'application/octet-stream'});
