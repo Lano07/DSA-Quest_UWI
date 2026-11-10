@@ -226,3 +226,8 @@ body.aq-mission-active #app{width:100%;max-width:100%;overflow:visible}
   .aq-sprite,.aq-spark{animation:none}
   .aq-chapter,.aq-btn,.aq-progress>span{transition:none}
 }
+
+/* Run and Check are separate: experimenting should never be marked wrong. */
+.aq-exec-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.aq-exec-actions .aq-btn{min-height:39px}
+@media(max-width:740px){.aq-editor-bottom{align-items:flex-start;flex-wrap:wrap}.aq-shortcut{flex-basis:100%}.aq-exec-actions{width:100%}.aq-exec-actions>.aq-btn{flex:1 1 130px}}
