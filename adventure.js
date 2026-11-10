@@ -59,7 +59,7 @@
       '<div class="aq-lesson-split"><section class="aq-instructions"><div class="aq-instruction-heading"><span class="aq-num">'+String(flat.indexOf(id)+1).padStart(2,'0')+'.</span><span class="aq-small-label">CODE MISSION</span></div><h1>'+esc(m.title)+'</h1><div class="aq-learning-tag"><span>✦</span> '+esc(m.category||'C++')+' · Beginner to intermediate</div><p class="aq-story">'+esc(t.story||'Your next puzzle is waiting. Read the clue, then write the code that makes it work.')+'</p><div class="aq-lesson-section"><h2><span class="aq-hash">#</span> Learn it</h2><p>'+esc(info)+'</p>'+(t.snippet?'<div class="aq-inline-code"><div class="aq-code-label">QUICK EXAMPLE</div><code>'+esc(t.snippet)+'</code></div>':'')+'</div><div class="aq-lesson-section"><h2><span class="aq-hash">#</span> Your mission</h2><p>'+esc(t.task||m.desc)+'</p><div class="aq-objective"><span>🎯</span><div><strong>GOAL</strong><div>'+esc(m.desc)+'</div></div></div></div><div class="aq-io"><div><strong>EXAMPLE INPUT</strong><pre>'+esc(m.input||'(no input needed)')+'</pre></div><div><strong>EXPECTED OUTPUT</strong><pre>'+esc(m.expected)+'</pre></div></div><div class="aq-hint-box"><button data-quest-hint class="aq-help-btn">✧ '+(hints?'Another clue':'Need a hint?')+' <span>⌄</span></button>'+(hints?'<p>'+esc(m.hint||'Compare your code with the goal and the example output.')+'</p>':'')+(hints>=2?'<p>'+esc(t.tip||'Trace one input at a time and check your loop boundaries.')+'</p>':'')+'</div>'+
       (reveal?'<div class="aq-solution-panel"><strong>Reference solution</strong><pre>'+esc((data.solutions||{})[id]||'Reference solution unavailable for this exercise.')+'</pre><p>Understand every line before copying. You can try a different solution too.</p><button class="aq-btn aq-btn-outline aq-btn-small" data-quest-load-solution '+(!(data.solutions||{})[id]?'disabled':'')+'>Load into editor</button></div>':'<button class="aq-show-solution" data-quest-reveal>Show a worked solution</button>')+
       '</section>'+
-      '<section class="aq-coding"><div class="aq-editor-title"><div class="aq-editor-tabs"><span class="aq-editor-tab active">⌘ main.cpp</span><span class="aq-editor-muted">C++ · '+(api.fullRunnerUrl()?'full compiler':'browser runner')+'</span></div><div class="aq-editor-tools"><button data-quest-reset aria-label="Reset code">↺ Reset</button><button data-page="playground">↗ Playground</button></div></div><div class="aq-code-edit"><div class="aq-line-gutter" id="aqGutter">'+Array.from({length:Math.max(14,code.split('\n').length)},(_,i)=>i+1).join('<br>')+'</div><textarea spellcheck="false" id="aqCode" aria-label="Edit your C++ solution" autocapitalize="off" autocomplete="off" autocorrect="off">'+esc(code)+'</textarea></div><div class="aq-editor-bottom"><span class="aq-shortcut">⌘ / Ctrl + Enter to run</span><button class="aq-btn aq-btn-run" id="aqRunBtn" data-quest-run '+(runtime.busy?'disabled':'')+'>'+ (runtime.busy?'Running…':'▶ Run code')+'</button></div><div class="aq-terminal"><div class="aq-terminal-head"><div class="aq-terminal-tabs"><span class="active">▣ Terminal</span></div><span id="aqTerminalStatus" class="aq-terminal-status '+(runtime.status==='PASSED'?'pass':'')+'">'+runtime.status+'</span></div><pre id="aqTerminalText" aria-live="polite">'+esc(runtime.terminal)+'</pre><div class="aq-stdin"><label for="aqInput">STANDARD INPUT <span>stdin</span></label><textarea id="aqInput" spellcheck="false" rows="2" aria-label="Program input">'+esc(m.input||'')+'</textarea></div></div></section></div>'+
+      '<section class="aq-coding"><div class="aq-editor-title"><div class="aq-editor-tabs"><span class="aq-editor-tab active">⌘ main.cpp</span><span class="aq-editor-muted">C++ · '+(api.fullRunnerUrl()?'full compiler':'browser runner')+'</span></div><div class="aq-editor-tools"><button data-quest-reset aria-label="Reset code">↺ Reset</button><button data-page="playground">↗ Playground</button></div></div><div class="aq-code-edit"><div class="aq-line-gutter" id="aqGutter">'+Array.from({length:Math.max(14,code.split('\n').length)},(_,i)=>i+1).join('<br>')+'</div><textarea spellcheck="false" id="aqCode" aria-label="Edit your C++ solution" autocapitalize="off" autocomplete="off" autocorrect="off">'+esc(code)+'</textarea></div><div class="aq-editor-bottom"><span class="aq-shortcut">⌘ / Ctrl + Enter to run</span><div class="aq-exec-actions"><button class="aq-btn aq-btn-outline aq-btn-small" id="aqRunBtn" data-quest-run '+(runtime.busy?'disabled':'')+'>▶ Run code</button><button class="aq-btn aq-btn-run" id="aqCheckBtn" data-quest-check '+(runtime.busy?'disabled':'')+'>✓ Check mission</button></div></div><div class="aq-terminal"><div class="aq-terminal-head"><div class="aq-terminal-tabs"><span class="active">▣ Terminal</span></div><span id="aqTerminalStatus" class="aq-terminal-status '+(runtime.status==='PASSED'?'pass':'')+'">'+runtime.status+'</span></div><pre id="aqTerminalText" aria-live="polite">'+esc(runtime.terminal)+'</pre><div class="aq-stdin"><label for="aqInput">STANDARD INPUT <span>stdin</span></label><textarea id="aqInput" spellcheck="false" rows="2" aria-label="Program input">'+esc(m.input||'')+'</textarea></div></div></section></div>'+
       '<footer class="aq-lesson-footer"><div class="aq-footer-left"><span>✦</span><strong>'+esc(m.title)+'</strong><small>'+ (index+1)+' / '+chapter.items.length+'</small></div><div class="aq-footer-actions"><button class="aq-btn aq-btn-outline" data-quest-prev '+(flat.indexOf(id)===0?'disabled':'')+'>← Prev</button><button class="aq-btn '+(solved?'aq-btn-lime':'aq-btn-muted')+'" data-quest-next '+(!solved?'disabled aria-label="Run and pass this mission to continue"':'')+'>'+(next?'Next mission →':'Quest completed ✓')+'</button></div></footer></div>';
   }
   function renderQuest(){
@@ -87,17 +87,18 @@
     if(indicator){indicator.textContent=status;indicator.classList.toggle('pass',status==='PASSED');}
   }
   function norm(s){return String(s==null?'':s).trim().replace(/\s+/g,' ');}
-  async function run(){
+  async function run(check=false){
     const id=state.questActive,m=missionById.get(id),field=document.querySelector('#aqCode');
     if(!m||runtime.busy||!field)return;
     state.questCode[id]=field.value;
     api.save();runtime.busy=true;
-    const runButton=document.querySelector('#aqRunBtn');if(runButton){runButton.disabled=true;runButton.textContent='Running…';}
-    const input=document.querySelector('#aqInput')?.value??m.input??'';
+    const runButton=document.querySelector('#aqRunBtn'),checkButton=document.querySelector('#aqCheckBtn');if(runButton)runButton.disabled=true;if(checkButton)checkButton.disabled=true;
+    const input=check?(m.input||''):(document.querySelector('#aqInput')?.value??m.input??'');
     setResult('Compiling and running your C++ code…','RUNNING');
     try{
       const code=field.value,res=await api.executeCPP(code,input,{'main.cpp':code});
       if(res.exitCode!==0){setResult((res.stderr||'')+'\n'+(res.output||'')+'\nProgram exited with code '+res.exitCode,'ERROR');return;}
+      if(!check){setResult((res.output||'(no output)')+(res.stderr?'\n\nstderr:\n'+res.stderr:'')+'\n\n[process exited: '+res.exitCode+']','FINISHED');return;}
       if(norm(res.output)!==norm(m.expected)){
         setResult('Your output:\n'+(res.output||'(no output)')+'\n\nExpected output:\n'+m.expected+'\n\nCompare carefully. Try adjusting your code.','TRY AGAIN');return;
       }
@@ -115,14 +116,15 @@
       redraw();
     }catch(e){setResult('Could not run this C++ program.\n\n'+(e.message||String(e))+'\n\nThe browser runner supports only a subset of C++. For more C++ support, use the optional local compiler described in the Playground.','ERROR');}
     finally{
-      runtime.busy=false;const button=document.querySelector('#aqRunBtn');if(button){button.disabled=false;button.textContent='▶ Run code';}
+      runtime.busy=false;const button=document.querySelector('#aqRunBtn'),check=document.querySelector('#aqCheckBtn');if(button)button.disabled=false;if(check)check.disabled=false;
     }
   }
   document.addEventListener('click',function(e){
     const openBtn=e.target.closest('[data-quest-open]');
     if(openBtn){e.preventDefault();open(openBtn.getAttribute('data-quest-open'));return;}
     if(e.target.closest('[data-quest-map]')){e.preventDefault();chooseMap();return;}
-    if(e.target.closest('[data-quest-run]')){e.preventDefault();run();return;}
+    if(e.target.closest('[data-quest-run]')){e.preventDefault();run(false);return;}
+    if(e.target.closest('[data-quest-check]')){e.preventDefault();run(true);return;}
     const id=state.questActive;
     if(!id)return;
     if(e.target.closest('[data-quest-hint]')){
@@ -159,7 +161,7 @@
     if(e.key==='Tab'){
       e.preventDefault();const t=e.target,i=t.selectionStart;t.setRangeText('  ',i,t.selectionEnd,'end');t.dispatchEvent(new Event('input',{bubbles:true}));
     }
-    if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();run();}
+    if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();run(false);}
   });
   window.DSAAdventure={renderPage,activeMission,renderMap,renderHome,missions,chapters,open};
   if(['home','quest'].includes(location.hash.replace('#',''))){api.render();}
