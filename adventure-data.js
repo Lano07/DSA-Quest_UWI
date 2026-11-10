@@ -287,8 +287,8 @@ window.DSAAdventureData = {
       "desc": "Traverse the fixed graph from vertex 0 with BFS and visit neighbors in increasing index order. Print each visited vertex.",
       "input": "",
       "expected": "0 1 2 3 4",
-      "starter": "#include <iostream>\nusing namespace std;\n\nint main() {\n  int adj[5][5]={{0,1,1,0,0},{1,0,0,1,0},{1,0,0,0,1},{0,1,0,0,0},{0,0,1,0,0}};\n  int visited[5]={0},queue[5],front=0,back=0;\n  visited[0]=1;queue[back++]=0;\n  // TODO: while queue not empty, visit front and enqueue unseen neighbors\n  return 0;\n}\n",
-      "hint": "while(front<back), pop queue[front++] and scan neighbors v=0..4; mark visited before enqueueing.",
+      "starter": "#include <iostream>\nusing namespace std;\nint main(){\n  int adj[25]={0,1,1,0,0,1,0,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,1,0,0};\n  int visited[5]={0}, queue[5], front=0, back=0;\n  visited[0]=1;queue[back++]=0;\n  // TODO: visit queue front and enqueue unseen neighbors\n  // Use adj[u*5+v] to check an edge from u to v.\n  return 0;\n}\n",
+      "hint": "The 5×5 adjacency matrix is stored as a flat array. Use adj[u*5+v] and a queue with front/back indexes.",
       "tests": []
     }
   ],
@@ -527,9 +527,9 @@ window.DSAAdventureData = {
     "graph-bfs": {
       "story": "A rescue team must visit the closest islands first.",
       "teach": "BFS uses a queue and marks neighbors visited before enqueueing. It explores vertices layer by layer.",
-      "snippet": "while(front<back){...}",
+      "snippet": "if(adj[u*5+v] && !visited[v]) { /* enqueue */ }",
       "task": "Implement BFS on the fixed five-vertex graph.",
-      "tip": "Scan adjacency-matrix columns in ascending order."
+      "tip": "Mark a vertex visited when you enqueue it, not only after you pop it."
     },
     "matrix-diagonal": {
       "story": "The telescope tracks a diagonal pattern.",
