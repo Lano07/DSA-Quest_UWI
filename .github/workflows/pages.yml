@@ -26,8 +26,12 @@ jobs:
       - name: Check JavaScript and server syntax
         run: |
           node --check app.js
+          node --check adventure.js
+          node --check adventure-data.js
+          node --check adventure-solutions.js
           node --check backend/server.mjs
           node tests/smoke.mjs
+          node tests/adventure-smoke.mjs
       - name: Prepare public website
         run: |
           mkdir -p site
