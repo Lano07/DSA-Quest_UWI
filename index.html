@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#121c2d">
-  <meta name="description" content="DSA Quest: Code Academy — learn COMP 2611 through playable C++ lessons, interactive algorithms and practice.">
+  <meta name="theme-color" content="#101626">
+  <meta name="description" content="Explore the Structure Isles: a pixel-art C++ adventure for COMP 2611. Restore beacons, battle guardians, and bring data structures to life.">
   <title>DSA Quest · The Structure Isles</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,37 +12,34 @@
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./extras.css">
   <link rel="stylesheet" href="./adventure.css">
-  <script defer src="./app.js"></script>
+  <link rel="stylesheet" href="./pixel-theme.css?v=3">
+  <script defer src="./app.js?v=3"></script>
   <script defer src="./adventure-data.js"></script>
   <script defer src="./adventure-solutions.js"></script>
   <script defer src="./quest-checkpoints.js"></script>
-  <script defer src="./world-art.js"></script>
+  <script defer src="./world-art.js?v=3"></script>
   <script defer src="./studio.js"></script>
-  <script defer src="./adventure.js"></script>
+  <script defer src="./adventure.js?v=3"></script>
 </head>
 <body>
 <a class="skip-link" href="#app">Skip to adventure</a>
 <div class="shell">
-  <aside class="sidebar">
-    <a class="brand" href="#home" aria-label="DSA Quest home"><span class="brand-symbol">⌘</span><span>DSA<span class="brand-accent">QUEST</span><small>CODE ACADEMY</small></span></a>
-    <div class="sidebar-label">THE ACADEMY</div>
-    <nav class="nav" aria-label="Main navigation">
-      <button data-page="home" class="nav-item active"><span class="ni">✦</span> Adventure</button>
-      <button data-page="lab" class="nav-item"><span class="ni">⌬</span> Tinker Grove</button>
-      <button data-page="practice" class="nav-item"><span class="ni">⚔</span> Practice</button>
-      <button data-page="boss" class="nav-item"><span class="ni">♜</span> Guardians</button>
-      <button data-page="playground" class="nav-item"><span class="ni">⌘</span> Playground</button>
-      <button data-page="learn" class="nav-item"><span class="ni">▤</span> Field guide</button>
+  <header class="site-header">
+    <a class="site-brand" href="#home" aria-label="DSA Quest home"><span class="brand-beacon" aria-hidden="true">✦</span><span>DSA<span>QUEST</span><small>THE STRUCTURE ISLES</small></span></a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <button data-page="home" class="site-tab active" aria-current="page"><span aria-hidden="true">✦</span> Adventure</button>
+      <button data-page="lab" class="site-tab"><span aria-hidden="true">⌬</span> Tinker Grove</button>
+      <button data-page="practice" class="site-tab"><span aria-hidden="true">⚔</span> Practice</button>
+      <button data-page="boss" class="site-tab"><span aria-hidden="true">♜</span> Guardians</button>
+      <button data-page="playground" class="site-tab"><span aria-hidden="true">⌘</span> Playground</button>
+      <button data-page="learn" class="site-tab"><span aria-hidden="true">▤</span> Field guide</button>
     </nav>
-    <div class="sidebar-label second-label">RESOURCES</div>
-    <nav class="nav nav-extra" aria-label="Resources"><button data-page="roadmap" class="nav-item">COMP 2611 roadmap</button></nav>
-    <div class="sidebar-bottom"><div class="side-badge">✦ <strong>LEARN BY DOING</strong></div><p>Learn the idea. Write the code. Watch it work.</p><div class="side-note">An independent learning project for UWI St. Augustine. Not affiliated with Codédex or UWI.</div></div>
-  </aside>
+    <span class="header-edition" aria-hidden="true">C++<small>PLAYER ONE</small></span>
+  </header>
   <div class="main-col">
     <header class="topbar">
-      <button id="menuToggle" class="mobile-menu" aria-label="Toggle menu">☰</button>
-      <div class="crumb">UWI ST. AUGUSTINE <span class="slash">/</span> COMP 2611 <span class="slash">/</span> <strong id="crumbCurrent">Command center</strong></div>
-      <div class="top-right"><span class="streak">⚡ <strong id="streakTop">0</strong> DAY STREAK</span><span class="xp-chip">✦ <strong id="xpTop">0</strong> XP</span><span class="avatar">L</span></div>
+      <div class="crumb">UWI ST. AUGUSTINE <span class="slash">/</span> COMP 2611 <span class="slash">/</span> <strong id="crumbCurrent">Welcome, adventurer</strong></div>
+      <div class="top-right"><span class="streak">⚡ <strong id="streakTop">0</strong> DAY STREAK</span><span class="xp-chip">✦ <strong id="xpTop">0</strong> XP</span><span class="avatar" aria-hidden="true">✦</span></div>
     </header>
     <main id="app" tabindex="-1"></main>
     <footer class="footer"><span>DSA QUEST · THE STRUCTURE ISLES <a href="#roadmap">Course roadmap ↗</a></span><span>Independent COMP 2611 study project · Not affiliated with UWI or Codédex · Progress stays on this device.</span></footer>

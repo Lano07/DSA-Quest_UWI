@@ -1,0 +1,273 @@
+/* The pixel-world skin. Navigation deliberately has no legacy sidebar classes. */
+:root {
+  --pixel: "Press Start 2P", "JetBrains Mono", monospace;
+  --bg: #101626;
+  --surface: #1b243c;
+  --line: #3b4866;
+  --gold: #ffda89;
+  --mint: #90e0bc;
+}
+body { background: radial-gradient(ellipse at 80% 0%, #263048 0, transparent 48%), var(--bg); }
+.site-header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 28px;
+  min-height: 76px;
+  width: 100%;
+  padding: 0 3%;
+  border-bottom: 2px solid #303b55;
+  background: #111828;
+}
+.site-brand { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+.site-brand > span:last-child { font: 11px/1.7 var(--pixel); letter-spacing: -.5px; }
+.site-brand > span:last-child > span { color: var(--gold); }
+.site-brand small { display: block; margin-top: 5px; font: 8px/1.5 var(--mono); color: #a8b6d1; letter-spacing: 1.6px; }
+.brand-beacon {
+  display: grid; place-items: center; width: 36px; height: 36px; font-size: 25px;
+  color: #ffdf96; background: #36354a; border: 2px solid #e1ba73;
+  box-shadow: inset -4px -4px #272b3d, 3px 3px #080e1b;
+}
+.site-nav {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 3px;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #a38458 #192239;
+}
+.site-tab {
+  display: inline-flex;
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 76px;
+  padding: 0 13px;
+  white-space: nowrap;
+  color: #b9c5de;
+  background: transparent;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  font: 600 12px var(--body);
+}
+.site-tab > span { font-size: 17px; color: #9bb2df; }
+.site-tab:hover { background: #1e2940; color: #fff1cd; }
+.site-tab.active { border-bottom-color: var(--gold); color: var(--gold); background: linear-gradient(transparent, #f8cf7910); }
+.site-tab.active > span { color: var(--gold); }
+.site-tab:focus-visible { outline-offset: -5px; }
+.header-edition { margin-left: auto; font: 13px var(--pixel); color: #a9d9c5; text-align: right; white-space: nowrap; }
+.header-edition small { display: block; margin-top: 8px; font: 7px var(--mono); letter-spacing: 1.5px; color: #91a5bb; }
+.topbar { height: 38px; padding: 0 3%; background: #172034; }
+.crumb { font-size: 9px; }
+.xp-chip { color: var(--gold); }
+.avatar { border-radius: 0; box-shadow: 2px 2px #08121d; width: 22px; height: 22px; }
+.world-page, .mission-page { max-width: 1660px; padding: 26px 3% 36px; }
+.pixel-hero {
+  position: relative; isolation: isolate; overflow: hidden; min-height: 350px; margin-bottom: 28px;
+  background: #263656; border: 2px solid #586481;
+  box-shadow: 0 5px 0 #080e1d, inset 0 0 0 3px #15243b;
+}
+.hero-landscape { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 70% center; image-rendering: pixelated; z-index: -3; }
+.hero-shade { position: absolute; inset: 0; z-index: -2; background: linear-gradient(90deg, #101c34f2, #15213bbd 29%, #182b4140 52%, transparent 72%); }
+.hero-copy { position: relative; padding: 34px 36px 36px; max-width: 600px; }
+.hero-kicker { display: flex; align-items: center; gap: 9px; color: #d3e6e6; font: 9px/1.8 var(--mono); letter-spacing: 2px; }
+.hero-kicker i { display: block; width: 7px; height: 7px; background: #99e5ba; box-shadow: 0 0 13px #b4f2cc70; }
+.pixel-hero h1 { font: 25px/1.65 var(--pixel); letter-spacing: -1px; color: #fff4d6; text-shadow: 3px 3px #18243b; margin: 19px 0 12px; }
+.pixel-hero h1 em { color: var(--gold); font-style: normal; }
+.hero-copy p { color: #d8e5ef; font: 14px/1.8 var(--body); margin: 0; text-shadow: 0 2px #152139; }
+.hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-top: 23px; }
+.hero-actions .quest-button { min-height: 48px; padding: 13px 20px; }
+.hero-save { color: #e4cfaa; font: 8px/1.7 var(--mono); letter-spacing: 1px; }
+.hero-save small { display: block; margin-top: 3px; color: #b9cfde; font-size: 9px; letter-spacing: 0; }
+.hero-coordinate { position: absolute; right: 17px; bottom: 16px; padding: 9px 11px; color: #ffe8b9; border: 1px solid #a4b1c061; background: #152034c9; font: 8px var(--mono); letter-spacing: 1.5px; }
+.pixel-mote { width: 4px; height: 4px; background: #ffdc91; position: absolute; z-index: -1; box-shadow: 0 0 9px #ffdf86; animation: pixelDrift 7s steps(8, end) infinite; }
+.mote-one { left: 58%; top: 64%; }
+.mote-two { left: 78%; top: 46%; animation-delay: -3s; }
+.mote-three { left: 90%; top: 23%; animation-delay: -5s; }
+@keyframes pixelDrift { 0%, 100% { transform: translate(0, 0); opacity: .3; } 50% { transform: translate(8px, -16px); opacity: 1; } }
+.quest-button, .btn {
+  border-radius: 2px; border-width: 2px; border-color: #fff0bb;
+  box-shadow: inset 0 -3px #ddb875, 3px 4px 0 #080f20;
+}
+.quest-button:hover:not(:disabled), .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: inset 0 -3px #ddb875, 3px 6px 0 #080f20; }
+.quest-button.subtle { box-shadow: inset 0 -3px #1a253b, 3px 4px #090f1e; border-color: #536584; }
+.world-layout { gap: 22px; grid-template-columns: minmax(0, 1fr) 290px; }
+.map-topline { border-radius: 0; border: 2px solid #4b5c75; border-bottom: 1px solid #405673; background: #202c43; min-height: 60px; padding: 8px 17px; }
+.view-switch { border-radius: 0; background: #121c30; }
+.view-switch button { border-radius: 0; min-height: 40px; }
+.view-switch button[aria-pressed=true] { background: #45516b; color: #ffebb9; box-shadow: inset 0 -2px #78839b; }
+.live-dot { border-radius: 0; }
+.island-map {
+  min-height: 515px; padding: 12px 9px 21px; gap: 36px 2px;
+  border-left: 2px solid #4b5c75; border-right: 2px solid #4b5c75;
+  background:
+    radial-gradient(ellipse at 16% 20%, #2c60783b, transparent 50%),
+    radial-gradient(ellipse at 77% 90%, #644a704a, transparent 50%),
+    repeating-linear-gradient(0deg, transparent 0 37px, #c4edee05 37px 38px),
+    #17283d;
+}
+.island-node { border-radius: 0; padding: 25px 2px 7px; justify-content: flex-end; }
+.island-node.selected { background: linear-gradient(transparent 20%, #ffd88c10 85%, transparent); }
+.island-art { position: relative; display: block; width: 190px; height: auto; aspect-ratio: 1; flex-shrink: 0; }
+.island-sprite {
+  position: absolute; inset: 0; display: block; background-image: url("./assets/island-atlas.png");
+  background-size: 500% 200%; background-repeat: no-repeat; image-rendering: pixelated;
+}
+.island-node .island-art { width: 100%; max-width: 180px; height: auto; filter: drop-shadow(0 8px 2px #09121d66); }
+.island-node.selected .island-art { filter: drop-shadow(0 0 9px #edc98a30); animation: pixelFloat 5s steps(5, end) infinite; }
+.island-node:hover .island-art { transform: translateY(-5px); }
+@keyframes pixelFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+.island-node strong { font: 600 11px/1.5 var(--mono); min-height: 33px; display: grid; place-items: center; max-width: 160px; }
+.island-index { top: 5px; border-radius: 0; height: 22px; width: 26px; left: calc(50% - 13px); background: #1d3048; border-color: #63869a; box-shadow: 2px 2px #0c192a; }
+.island-node.selected .island-index { box-shadow: 2px 2px #806b4b; }
+.beacons { margin-top: 5px; }
+.beacons i { width: 6px; height: 6px; transform: none; box-shadow: 1px 1px #0c1b2a; }
+.beacons .lit { box-shadow: 0 0 8px #ffd48585; }
+.island-flag { position: absolute; right: 14%; top: 12%; background: #ffe2a0; color: #253950; border: 2px solid #fff0b7; padding: 1px 3px; font: 10px var(--mono); box-shadow: 2px 2px #4a513e; }
+.map-route { stroke: #b0c0c5; stroke-dasharray: 3 8; opacity: .23; }
+.sea-label { top: 49%; color: #b7cbdc; font-size: 8px; letter-spacing: 3px; }
+.map-legend { border: 2px solid #4b5c75; border-top: 1px solid #405673; border-radius: 0; padding: 13px 16px; background: #202c43; }
+.pip-dialogue { border: 2px solid #53627a; border-radius: 0; background: #202c43; box-shadow: 4px 4px #090f20; }
+.guide-art { image-rendering: pixelated; filter: drop-shadow(3px 4px #101a2c); }
+.pip-dialogue .micro { font: 7px/1.8 var(--pixel); letter-spacing: 0; }
+.pip-dialogue p { margin-top: 9px; }
+.quest-log { border: 2px solid #655f77; border-radius: 0; box-shadow: 4px 4px #080f20; background: #222a40; }
+.chapter-preview { position: relative; padding: 0 10px 13px; background: radial-gradient(ellipse at 50% 70%, #53616b82, transparent 66%), #293249; border-color: #5a596e; }
+.chapter-preview > .island-art { width: 172px; height: 172px; margin: -2px 0 0; }
+.chapter-preview > .micro { font: 8px var(--mono); letter-spacing: 2px; }
+.quest-log-body { padding: 20px; }
+.map-return { display: none; }
+.quest-log h2 { font: 11px/1.9 var(--pixel); letter-spacing: -.4px; color: #ffe5ac; margin-bottom: 6px; }
+.quest-log .muted { font-size: 12px; margin-bottom: 15px; }
+.mission-dot { border-radius: 0; background: #162238; width: 23px; height: 23px; }
+.mission-list { margin: 10px 0 18px; }
+.mission-list button { min-height: 45px; }
+.mission-list button:hover { background: #ffe3a20b; }
+.chapter-progress { font-size: 9px; }
+progress { height: 8px; border-radius: 0; border: 1px solid #4b5a71; }
+.expedition-extras button { border: 2px solid #42516b; border-radius: 0; background: #1c293f; box-shadow: 3px 3px #090f20; }
+.extra-icon { border-radius: 0; border-width: 2px; box-shadow: 2px 2px #0a1527; }
+.expedition-extras strong { font: 10px/1.8 var(--pixel); }
+.expedition-extras small { font-size: 12px; }
+.collection, .collection-item { border-radius: 0; }
+.collection { border-width: 2px; }
+.collection-item .island-art { width: 115px; height: 115px; margin: auto; }
+.mission-title h1 { font: 23px/1.7 var(--pixel); letter-spacing: -.8px; color: #ffebbd; }
+.mission-steps button, .mission-steps button > span { border-radius: 0; }
+.mission-steps button { border-width: 2px; }
+.lesson-step, .mission-ide, .battle-question { border-radius: 0; border-width: 2px; box-shadow: 4px 4px #080f20; }
+.lesson-step h2 { font: 600 23px/1.5 var(--display); }
+.mission-scenery { background: radial-gradient(ellipse, #434c5960, transparent 68%); }
+.mission-scenery > .island-art { width: min(320px, 100%); height: auto; animation: pixelFloat 5s steps(5, end) infinite; }
+.mission-scenery .micro { font: 8px/1.9 var(--pixel); color: #e0ca9f; letter-spacing: 0; margin-top: 18px; }
+.lesson-code, .mission-help pre, .mission-objective, .sample-pair > div, .checkpoint-options button, .victory-banner { border-radius: 0; }
+.checkpoint-options button { border-width: 2px; }
+.victory-banner { border: 2px solid #87c8a0; box-shadow: 3px 3px #10271f; }
+.guardian-card { border-radius: 0; border: 2px solid #625e7a; box-shadow: 3px 3px #080f20; }
+.guardian-art { image-rendering: pixelated; filter: drop-shadow(5px 6px #0f172b); }
+.guardian-card h2 { font: 9px/1.9 var(--pixel); letter-spacing: -.4px; }
+.battle-page h1 { font: 19px/1.8 var(--pixel); color: #ffe4ac; }
+.battle-stage .guardian-art { animation: pixelFloat 4s steps(4, end) infinite; }
+.studio-tabs button, .studio-controls, .studio-controls input, .studio-controls select, .studio-status, .structure-node { border-radius: 0; }
+.studio-controls { border-width: 2px; }
+.studio-stage { border-width: 2px; background: radial-gradient(ellipse, #28434b, #15253b); }
+.structure-node { box-shadow: 3px 3px #0b1c2a, inset 0 -4px #1c3c40; }
+.studio-tabs button[aria-pressed=true] { box-shadow: inset 0 -3px #5c9b89, 2px 2px #0b1726; }
+.page h1 { font-size: clamp(28px, 3.5vw, 44px); }
+.page .eyebrow { font: 8px/1.8 var(--pixel); letter-spacing: 0; }
+.page .card, .page .challenge-item, .page .editor-shell, .page .note, .page .terminal, .page .file-tab { border-radius: 2px; }
+.footer { margin-top: auto; padding: 20px 3%; color: #a7b5cc; }
+@media (max-width: 1250px) {
+  .site-header { gap: 20px; padding: 0 2.5%; }
+  .header-edition { display: none; }
+  .site-tab { padding: 0 12px; }
+  .world-layout { grid-template-columns: minmax(0, 1fr) 260px; gap: 18px; }
+  .quest-log-body { padding: 16px; }
+  .island-node strong { font-size: 10px; }
+  .pixel-hero h1 { font-size: 23px; }
+  .hero-copy { padding: 30px; }
+}
+@media (max-width: 1000px) {
+  .site-header { display: grid; grid-template-columns: 1fr; gap: 0; padding: 0; }
+  .site-brand { min-height: 58px; justify-self: start; padding: 9px 3%; }
+  .site-brand > span:last-child { font-size: 10px; }
+  .site-brand small { display: none; }
+  .brand-beacon { width: 30px; height: 30px; font-size: 21px; }
+  .site-nav { padding: 0 2%; width: 100%; border-top: 1px solid #303b55; }
+  .site-tab { min-height: 48px; padding: 0 16px; }
+  .topbar { height: 33px; }
+  .world-layout { grid-template-columns: 1fr; }
+  .pixel-hero { min-height: 330px; }
+  .pixel-hero h1 { font-size: 22px; }
+  .quest-log { grid-template-columns: 210px 1fr; }
+  .map-return { display: inline-flex; margin-bottom: 12px; color: var(--mint); }
+  .chapter-preview { border-bottom: 0; }
+  .chapter-preview > .island-art { width: 190px; height: 190px; }
+  .island-node strong { font-size: 11px; }
+  .island-map { min-height: 510px; }
+  .expedition-extras strong { font-size: 9px; }
+}
+@media (max-width: 740px) {
+  .site-tab { min-height: 48px; padding: 0 14px; font-size: 12px; }
+  .site-nav { padding: 0 7px; }
+  .site-header { min-height: 0; }
+  .site-brand { min-height: 52px; padding: 9px 17px; gap: 10px; }
+  .topbar { padding: 0 17px; }
+  .world-page, .mission-page { padding: 18px 14px 30px; }
+  .pixel-hero { min-height: 380px; margin-bottom: 22px; }
+  .hero-landscape { object-position: 62% center; opacity: .72; }
+  .hero-shade { background: linear-gradient(90deg, #101b32ed, #1220399c 53%, #14274140), linear-gradient(0deg, #122039b0, transparent 40%); }
+  .hero-copy { padding: 25px 20px 55px; }
+  .hero-kicker { font-size: 8px; letter-spacing: .8px; }
+  .pixel-hero h1 { font-size: clamp(17px, 4.7vw, 24px); margin: 21px 0 16px; line-height: 1.8; }
+  .hero-copy p { font-size: 13px; }
+  .hero-actions { gap: 15px; align-items: start; flex-direction: column; margin-top: 22px; }
+  .hero-actions .quest-button { width: 100%; }
+  .hero-save { font-size: 7px; }
+  .hero-save small { display: inline; margin-left: 10px; font-size: 8px; }
+  .hero-coordinate { right: 12px; bottom: 13px; font-size: 7px; background: #152034cc; letter-spacing: .7px; }
+  .map-topline { padding: 7px 9px; font-size: 8px; letter-spacing: .6px; }
+  .view-switch button { min-height: 44px; padding: 7px 10px; }
+  .island-map { min-height: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 6px; padding: 12px 6px 22px; }
+  .island-node { min-height: 220px; padding-top: 23px; }
+  .island-node .island-art { max-width: 180px; }
+  .island-node strong { font-size: 10px; }
+  .island-map.list-view { grid-template-columns: 1fr; gap: 4px; padding: 10px; }
+  .list-view .island-node { min-height: 78px; padding: 6px; }
+  .list-view .island-art { width: 64px; height: 64px; }
+  .list-view .island-node strong { min-height: 0; }
+  .list-view .beacons { gap: 3px; }
+  .list-view .beacons i { width: 4px; height: 4px; }
+  .map-legend { font-size: 9px; padding: 13px; }
+  .pip-dialogue { padding: 16px 12px; gap: 11px; }
+  .pip-dialogue .micro { font-size: 6px; line-height: 2; }
+  .pip-dialogue p { font-size: 13px; }
+  .quest-log { display: block; }
+  .quest-log-body { padding: 20px; }
+  .quest-log h2 { font-size: 12px; }
+  .expedition-extras strong { font-size: 10px; }
+  .expedition-extras small { font-size: 12px; }
+  .mission-title h1 { font-size: 18px; line-height: 1.8; letter-spacing: -.5px; }
+  .mission-steps button { font-size: 11px; padding: 10px 6px; }
+  .mission-workspace { gap: 18px; }
+  .lesson-step { padding: 20px; }
+  .guardian-card h2 { font-size: 8px; }
+  .battle-page h1 { font-size: 17px; }
+  .collection-item .island-art { width: 110px; height: 110px; }
+}
+@media (min-width: 741px) {
+  .island-map.list-view { min-height: 0; padding: 14px; gap: 4px 18px; }
+  .list-view .island-node { padding: 8px; min-height: 82px; }
+  .list-view .island-art { width: 70px; height: 70px; }
+  .list-view .island-node strong { min-height: 0; text-align: left; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

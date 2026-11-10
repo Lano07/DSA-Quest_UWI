@@ -6,6 +6,8 @@ An original illustrated C++ adventure for independent study alongside **UWI St. 
 
 Meet Pip, a hummingbird guide, and restore the beacons of ten floating islands. The home screen is the playable chapter map. There are no accounts, payments, artificial time limits on learning, or locked chapters.
 
+The pixel-world update replaces the inherited sidebar with a compact horizontal navigation bar. On phones the tabs stay in one swipeable row with 48-pixel touch targets. Original 16-bit-style scenery, ten detailed island sprites, pixel characters, stepped animation and game panels carry through the map, missions, guardians and visualizers. Selecting an island on a narrow screen brings its missions into view, with a return-to-island control.
+
 ## The adventure
 
 - **35 missions**, each with three short steps: Discover → Predict → Build. Each has a distinct checkpoint, hints, reference solution, C++ editor, stdin and terminal.
@@ -77,6 +79,6 @@ The deployed [`version.json`](https://lano07.github.io/DSA-Quest_UWI/version.jso
 
 The [public COMP 2611 description](https://sta.uwi.edu/fst/dcit/content/comp-2611) names stacks, queues, linked lists, binary trees, heaps and graphs. Additional material is enrichment; use your lecturer’s current syllabus for assessment scope.
 
-The public [Codédex course experience](https://www.codedex.io/python) and [public product update](https://www.codedex.io/blog/codedex-update-december-2024) informed the illustrated world, exercise-first pacing and immediate feedback. Pip, the islands, guardians, story and interface artwork are original SVG/CSS; no Codédex logos, artwork or protected lesson text are included.
+The public [Codédex course experience](https://www.codedex.io/python) and [public product update](https://www.codedex.io/blog/codedex-update-december-2024) informed the illustrated world, exercise-first pacing and immediate feedback. Pip, the islands, guardians, story and interface artwork are original. The landscape and island atlas were generated specifically for this project; the character sprites and interface use SVG/CSS. See [artwork notes](assets/README.md). No Codédex logos, artwork or protected lesson text are included.
 
 Independent project, not affiliated with UWI or Codédex. JSCPP is MIT-licensed; its unmodified distribution, revision, checksum and license are documented in [vendor/README.md](vendor/README.md).

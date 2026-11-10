@@ -14,7 +14,7 @@ import { randomUUID } from 'node:crypto';
 const HOST = '127.0.0.1';
 const PORT = Number(process.env.PORT || 8787);
 const ROOT = resolve(import.meta.dirname || new URL('.', import.meta.url).pathname, '..');
-const MIME = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8'};
+const MIME = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.png':'image/png'};
 const VALID_NAME = /^[a-zA-Z0-9_][a-zA-Z0-9_.-]{0,63}$/;
 let active = 0;
 const MAX_ACTIVE = 2;
@@ -116,7 +116,7 @@ const server=http.createServer(async(req,res)=>{
       finally{active--;}
     }
     if(req.method!=='GET')return json(res,405,{error:'Method not supported'});
-    const files={'/':'index.html','/index.html':'index.html','/app.js':'app.js','/style.css':'style.css','/extras.css':'extras.css','/adventure.css':'adventure.css','/adventure-data.js':'adventure-data.js','/adventure-solutions.js':'adventure-solutions.js','/adventure.js':'adventure.js','/world-art.js':'world-art.js','/studio.js':'studio.js','/quest-checkpoints.js':'quest-checkpoints.js','/vendor/jscpp.js':'vendor/jscpp.js','/vendor/JSCPP-LICENSE':'vendor/JSCPP-LICENSE'};
+    const files={'/':'index.html','/index.html':'index.html','/app.js':'app.js','/style.css':'style.css','/extras.css':'extras.css','/adventure.css':'adventure.css','/pixel-theme.css':'pixel-theme.css','/assets/structure-isles-panorama.png':'assets/structure-isles-panorama.png','/assets/island-atlas.png':'assets/island-atlas.png','/adventure-data.js':'adventure-data.js','/adventure-solutions.js':'adventure-solutions.js','/adventure.js':'adventure.js','/world-art.js':'world-art.js','/studio.js':'studio.js','/quest-checkpoints.js':'quest-checkpoints.js','/vendor/jscpp.js':'vendor/jscpp.js','/vendor/JSCPP-LICENSE':'vendor/JSCPP-LICENSE'};
     if(!Object.hasOwn(files,path))return json(res,404,{error:'Not found'});
     const filename=files[path],data=await readFile(join(ROOT,filename));
     res.writeHead(200,{'Content-Type':MIME[extname(filename)]||'application/octet-stream'});

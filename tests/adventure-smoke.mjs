@@ -57,7 +57,7 @@ const loss=createApp();loss.adventure.startGuardian(0);
 for(const question of firstThree){await loss.click('data-guardian-answer',(question.answer+1)%question.options.length);await loss.click('data-guardian-next');}
 assert.equal(loss.api.state.xp,0);
 assert.match(loss.adventure.renderPage('boss'),/TRY ANOTHER STRATEGY/);
-for(const file of ['adventure.js','adventure.css','world-art.js','studio.js','quest-checkpoints.js','adventure-data.js','adventure-solutions.js']){assert.ok(read('index.html').includes(file));assert.ok(read('.github/workflows/pages.yml').includes(file));}
+for(const file of ['adventure.js','adventure.css','pixel-theme.css','world-art.js','studio.js','quest-checkpoints.js','adventure-data.js','adventure-solutions.js']){assert.ok(read('index.html').includes(file));assert.ok(read('.github/workflows/pages.yml').includes(file));}
 assert.ok(read('.github/workflows/pages.yml').includes('vendor'));
 assert.doesNotMatch(read('adventure.js'),/key==='Tab'/);
 assert.doesNotMatch(read('app.js'),/key==='Tab'/);
