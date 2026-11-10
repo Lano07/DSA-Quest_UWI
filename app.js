@@ -402,7 +402,7 @@ if(a==='add-file'){const name=prompt('New file name (e.g. notes.txt):');if(name=
 if(a==='download-file'){download(state.activeFile,state.files[state.activeFile]);}
 if(a==='delete-file'){if(state.activeFile==='main.cpp')return;if(!confirm('Delete '+state.activeFile+' from browser storage?'))return;delete state.files[state.activeFile];state.activeFile='main.cpp';save();render();}
 if(a==='import-file')$('#fileImport').click();
-if(a==='export-project')download('dsa-quest-backup.json',JSON.stringify({version:2,files:state.files,progress:{xp:state.xp,done:state.done,solved:state.solved,answerSelections:state.answerSelections||{},practiceCode:state.practiceCode,lastDay:state.lastDay,streak:state.streak,bossVictories:state.bossVictories||0}},null,2),'application/json');
+if(a==='export-project')download('dsa-quest-backup.json',JSON.stringify({version:3,files:state.files,progress:{xp:state.xp,done:state.done,solved:state.solved,answerSelections:state.answerSelections||{},practiceCode:state.practiceCode,lastDay:state.lastDay,streak:state.streak,bossVictories:state.bossVictories||0,questDone:state.questDone||{},questCode:state.questCode||{},questHints:state.questHints||{},questRevealed:state.questRevealed||{},questActive:state.questActive||null}},null,2),'application/json');
 if(a==='import-project')$('#projectImport').click();
 });
 app.addEventListener('input',e=>{
@@ -423,6 +423,11 @@ if(d.progress&&typeof d.progress==='object'){
   state.lastDay=typeof p.lastDay==='string'?p.lastDay:state.lastDay;
   state.streak=Number.isInteger(p.streak)&&p.streak>=0?p.streak:state.streak;
   state.bossVictories=Number.isInteger(p.bossVictories)&&p.bossVictories>=0?p.bossVictories:(state.bossVictories||0);
+  state.questDone=p.questDone&&typeof p.questDone==='object'?p.questDone:(state.questDone||{});
+  state.questCode=p.questCode&&typeof p.questCode==='object'?p.questCode:(state.questCode||{});
+  state.questHints=p.questHints&&typeof p.questHints==='object'?p.questHints:(state.questHints||{});
+  state.questRevealed=p.questRevealed&&typeof p.questRevealed==='object'?p.questRevealed:(state.questRevealed||{});
+  state.questActive=typeof p.questActive==='string'?p.questActive:null;
 }
 save();render();toast('Project and available learning progress restored.');}catch(err){toast('Could not restore this project.');}}
 });
