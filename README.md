@@ -1,5 +1,18 @@
 # DSA Quest: Code Academy
 
+### Playable COMP 2611 coding adventure
+
+The new primary experience is a **Codédex-inspired, original pixel-art course**. It now has **35 guided coding missions in 10 illustrated chapters**, with a dedicated split-screen exercise workspace: readable instructions on the left, a C++ editor and terminal on the right.
+
+- **Run code** executes your work, using whichever input you type, without grading you.
+- **Check mission** runs the exercise's sample input plus any additional cases. Passing awards 40 XP once, then enables **Next mission**.
+- Each mission has focused teaching notes, an example, layered hints and a complete worked reference solution. No chapter has a paid lock.
+- A course map shows your completed chapters. The original 61 theory lessons, 24 Code Gym challenges, 14 visual labs and boss battle remain accessible.
+- Mission code and progress are saved in the browser. **Playground → Backup files + XP** also backs up your adventure progress.
+
+The pixel scenery and game interface are original CSS and do not reuse Codédex's images or branding.
+
+
 A game-inspired, responsive **C++ Data Structures & Algorithms academy** built for independent study alongside **UWI St. Augustine COMP 2611**. No payment, account or login is needed.
 
 ## What you can do
