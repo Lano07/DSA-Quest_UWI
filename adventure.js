@@ -12,6 +12,7 @@
   const chapterOf=id=>chapters.find(ch=>ch.items.includes(id));
   const flat=chapters.flatMap(ch=>ch.items);
   const complete=()=>flat.filter(id=>state.questDone[id]).length;
+  const badgesWon=()=>chapters.filter(ch=>ch.items.every(id=>state.questDone[id])).length;
   const nextUnfinished=()=>flat.find(id=>!state.questDone[id])||flat[0];
   state.questDone=state.questDone&&typeof state.questDone==='object'?state.questDone:{};
   state.questCode=state.questCode&&typeof state.questCode==='object'?state.questCode:{};
@@ -28,7 +29,7 @@
   function chapterTile(ch){
     const done=ch.items.filter(id=>state.questDone[id]).length;
     const first=ch.items.find(id=>!state.questDone[id])||ch.items[0];
-    return '<article class="aq-chapter" style="--chapter-accent:'+ch.tint+'"><div class="aq-chapter-art"><div class="aq-chapter-sun"></div><div class="aq-chapter-hill hill-back"></div><div class="aq-chapter-hill hill-front"></div><div class="aq-chapter-motif">'+ch.scene+'</div><div class="aq-chapter-caption">CHAPTER '+String(chapterIndex(ch)).padStart(2,'0')+'</div></div><div class="aq-chapter-body"><div class="aq-chapter-caption">'+done+' / '+ch.items.length+' MISSIONS COMPLETE</div><h3>'+esc(ch.name)+'</h3><p>'+esc(ch.subtitle)+'</p><div class="aq-progress" role="progressbar" aria-valuenow="'+percent(done,ch.items.length)+'" aria-valuemin="0" aria-valuemax="100"><span style="width:'+percent(done,ch.items.length)+'%"></span></div><button class="aq-chapter-button" data-quest-open="'+esc(first)+'">'+(done===ch.items.length?'Replay chapter':'Play chapter')+' <span>↗</span></button></div></article>';
+    return '<article class="aq-chapter" style="--chapter-accent:'+ch.tint+'"><div class="aq-chapter-art"><div class="aq-chapter-sun"></div><div class="aq-chapter-hill hill-back"></div><div class="aq-chapter-hill hill-front"></div><div class="aq-chapter-motif">'+ch.scene+'</div><div class="aq-chapter-caption">CHAPTER '+String(chapterIndex(ch)).padStart(2,'0')+'</div></div><div class="aq-chapter-body"><div class="aq-chapter-caption">'+(done===ch.items.length?'🏅 BADGE EARNED':done+' / '+ch.items.length+' MISSIONS COMPLETE')+'</div><h3>'+esc(ch.name)+'</h3><p>'+esc(ch.subtitle)+'</p><div class="aq-progress" role="progressbar" aria-valuenow="'+percent(done,ch.items.length)+'" aria-valuemin="0" aria-valuemax="100"><span style="width:'+percent(done,ch.items.length)+'%"></span></div><button class="aq-chapter-button" data-quest-open="'+esc(first)+'">'+(done===ch.items.length?'Replay chapter':'Play chapter')+' <span>↗</span></button></div></article>';
   }
   function introScene(){
     return '<div class="aq-scene" aria-hidden="true"><div class="aq-scene-sun"></div><div class="aq-scene-cloud c1"></div><div class="aq-scene-cloud c2"></div><div class="aq-hill back"></div><div class="aq-hill front"></div><div class="aq-platform p1"></div><div class="aq-platform p2"></div><div class="aq-platform p3"></div><div class="aq-tower"><span class="aq-tower-light"></span></div><div class="aq-sprite"><span class="aq-sprite-eye"></span></div><div class="aq-particle one">✦</div><div class="aq-particle two">✧</div><div class="aq-particle three">✦</div></div>';
@@ -43,9 +44,17 @@
     '<div class="aq-chapter-grid">'+chapters.slice(0,3).map(chapterTile).join('')+'</div>'+
     '<section class="aq-why"><div class="aq-why-icon">⌘</div><div><h2>Read less. Try more.</h2><p>Every mission puts a short explanation beside a code editor and terminal. Predict, edit, run, get feedback, and advance. You can always switch to the full theory library and practice gym.</p></div><button class="aq-btn aq-btn-outline" data-page="learn">Theory library →</button></section></div>';
   }
+
+  function renderBadgeShelf(){
+    return '<section class="aq-badge-shelf"><div class="aq-section-heading"><div><span class="aq-mini-label">COLLECT YOUR TROPHIES</span><h2>Chapter badges <span>✦</span></h2><span class="aq-badge-count">'+badgesWon()+' / '+chapters.length+' EARNED</span></div><div class="aq-badge-grid">'+chapters.map(ch=>{
+      const won=ch.items.every(id=>state.questDone[id]);
+      return '<div class="aq-badge '+(won?'won':'locked')+'"><span class="aq-badge-art">'+(won?ch.scene:'◇')+'</span><strong>'+esc(ch.name)+'</strong><small>'+(won?'🏅 Earned':'Complete the chapter')+'</small></div>';
+    }).join('')+'</div></section>';
+  }
+
   function renderMap(){
     const count=complete();
-    return '<div class="aq-map"><header class="aq-map-header"><div class="aq-map-kicker">✧ THE QUEST MAP · UWI COMP 2611</div><h1>Your coding <span>adventure.</span></h1><p>Pick a chapter or resume your next exercise. Nothing is paywalled, and every chapter is available from the start.</p><div class="aq-map-summary"><div><strong>'+count+' / '+flat.length+'</strong><span>missions completed</span></div><div class="aq-progress"><span style="width:'+percent(count,flat.length)+'%"></span></div><button class="aq-btn aq-btn-lime" data-quest-open="'+esc(nextUnfinished())+'">▶ Continue quest</button></div></header><div class="aq-chapter-grid">'+chapters.map(chapterTile).join('')+'</div></div>';
+    return '<div class="aq-map"><header class="aq-map-header"><div class="aq-map-kicker">✧ THE QUEST MAP · UWI COMP 2611</div><h1>Your coding <span>adventure.</span></h1><p>Pick a chapter or resume your next exercise. Nothing is paywalled, and every chapter is available from the start.</p><div class="aq-map-summary"><div><strong>'+count+' / '+flat.length+'</strong><span>missions completed</span></div><div class="aq-progress"><span style="width:'+percent(count,flat.length)+'%"></span></div><button class="aq-btn aq-btn-lime" data-quest-open="'+esc(nextUnfinished())+'">▶ Continue quest</button></div></header><div class="aq-chapter-grid">'+chapters.map(chapterTile).join('')+'</div>'+renderBadgeShelf()+'</div>';
   }
   function missionPanel(m){
     const id=m.id,chapter=chapterOf(id),index=chapter.items.indexOf(id),t=meta[id]||{};
