@@ -1,68 +1,82 @@
-# DSA Quest: Code Academy
+# DSA Quest · The Structure Isles
 
-### Playable COMP 2611 coding adventure
+An original illustrated C++ adventure for independent study alongside **UWI St. Augustine COMP 2611**.
 
-The new primary experience is a **Codédex-inspired, original pixel-art course**. It now has **35 guided coding missions in 10 illustrated chapters**, with a dedicated split-screen exercise workspace: readable instructions on the left, a C++ editor and terminal on the right.
+**Play:** https://lano07.github.io/DSA-Quest_UWI/
 
-- **Run code** executes your work, using whichever input you type, without grading you.
-- **Check mission** runs the exercise's sample input plus any additional cases. Passing awards 40 XP once, then enables **Next mission**.
-- Each mission has focused teaching notes, an example, layered hints and a complete worked reference solution. No chapter has a paid lock.
-- A course map shows your completed chapters. The original 61 theory lessons, 24 Code Gym challenges, 14 visual labs and boss battle remain accessible.
-- Mission code and progress are saved in the browser. **Playground → Backup files + XP** also backs up your adventure progress.
+Meet Pip, a hummingbird guide, and restore the beacons of ten floating islands. The home screen is the playable chapter map. There are no accounts, payments, artificial time limits on learning, or locked chapters.
 
-The pixel scenery and game interface are original CSS and do not reuse Codédex's images or branding.
+## The adventure
 
+- **35 missions**, each with three short steps: Discover → Predict → Build. Each has a distinct checkpoint, hints, reference solution, C++ editor, stdin and terminal.
+- **Run code** experiments with your input without grading. **Check mission** runs the sample plus any extra cases, awards **40 XP once**, lights the beacon, and enables the next mission.
+- **10 guardian battles** with three rounds, shield damage, hearts, explanations, replay, and a **100 XP first-victory reward**. Win all three rounds to collect the relic. The original ten-question Code Hydra remains available from Guardians.
+- **20 collectibles:** ten chapter badges and ten guardian relics. The map shows completion and the collection shelf shows what remains.
+- **Tinker Grove:** manipulate arrays, linked lists, stacks, queues, BSTs, max heaps, hash tables, graphs and bubble sort. Load your values, insert/remove, undo, toggle graph edges and step through BFS/DFS or sorting. The original **14 guided algorithm tours** remain available.
+- **Practice arena:** all **24 coding challenges** remain available with a separate first-solve reward.
+- **Field guide:** all **61 theory lessons across 14 tracks**, plus the course roadmap, are retained.
+- **Independent playground:** experiment outside the course, maintain virtual files, import/download text files, and back up or restore progress and projects.
 
-A game-inspired, responsive **C++ Data Structures & Algorithms academy** built for independent study alongside **UWI St. Augustine COMP 2611**. No payment, account or login is needed.
+Every island is a keyboard-accessible button. Mobile layouts use a two-column island trail and stacked lesson/editor panels; a compact list view is also available. Controls have focus indicators, editors allow Tab to leave, feedback uses status announcements, and motion respects `prefers-reduced-motion`.
 
-## What you can do
+## C++ execution: what is actually available
 
-- Learn through **61 guided lessons** in **14 tracks**, from basic C++, pointers, linked lists and recursion to trees, BST/AVL trees, heaps, hashing, BFS/DFS, Dijkstra, sorting, matrices, algorithm analysis and proofs. Each lesson has an example, a question, feedback and XP.
-- Explore **14 interactive visual labs**. Move one step at a time or use auto-play. Labs include pointer-based lists, queue operations, stack operations, recursion, heaps, hashing, trees, BFS/DFS, Dijkstra and sorting.
-- Fight the **Code Hydra**, a ten-question boss battle drawing from all lesson tracks, with three hearts and a first-win XP reward.
-- Work through **24 C++ coding missions** with hints, sample I/O, a code editor, an output terminal, automatic checks and extra cases for recent missions.
-- Use the **Playground** to edit C++, provide standard input, maintain several virtual files, import text files, export or restore a backup containing your files, XP and completed lessons, and keep progress in browser storage.
-- Connect the **optional local full C++17 compiler** for STL, multiple .cpp files, and real `std::ifstream`/`std::ofstream` I/O with files in the virtual workspace.
+The public GitHub Pages site runs a **bundled JSCPP interpreter in a Web Worker**. It does **not** host GCC, a compiler API, or Docker. No code is sent to a third-party execution service in browser mode.
 
-## Start now
+| Browser mode, available on the public site | Optional local compiler |
+| --- | --- |
+| Educational C++ subset: basic I/O, functions, arrays, pointers, loops | Native C++17 with GCC in Docker |
+| One source file; no general STL, `fstream`, or multi-file build | STL, multiple `.cpp` files, `ifstream`/`ofstream` |
+| Virtual files are browser text records; `input.txt` can be loaded into stdin | Imported virtual files are copied into a temporary compilation workspace |
+| 10-second worker deadline; 100,000-character output cap | Four-second program deadline, restricted container resources |
 
-Open `index.html` in a browser, or use the GitHub Pages deployment when enabled:
+JSCPP is not a standards-complete compiler. Some numeric edge cases, including negative integer division, differ from native C++. The provided reference solutions are checked against both JSCPP and native C++17. Use native C++ when exact language behavior matters.
 
-**https://lano07.github.io/DSA-Quest_UWI/**
+Passing a finite set of output checks is not proof of algorithmic correctness. The judge does not enforce a particular data structure or detect hard-coded outputs. Linked-list and tree browser missions deliberately use array-based links; pointer-based nodes and dynamic allocation are taught in the field guide and can be explored with the full compiler.
 
-If the site returns 404, open **GitHub → Repository Settings → Pages → Build and deployment → Source: GitHub Actions**. The included deployment workflow publishes from the main branch. Wait for the "Publish DSA Quest to GitHub Pages" action to finish.
+To use the full compiler, follow [backend/README.md](backend/README.md):
 
-The browser interpreter is **JSCPP**, an educational subset of C++, loaded when you first run code. It does **not** compile general C++17, STL, multiple files or `fstream`. Do not confuse passing a small sample with a complete program correctness proof.
-
-### Full C++17 and file I/O (optional)
-
-Read [backend/README.md](backend/README.md). Install Docker and Node.js, then:
-
-```bash
+```sh
 docker pull gcc:14
 node backend/server.mjs
 ```
 
-Visit **http://127.0.0.1:8787** for the full C++ playground. Virtual files are copied into an isolated temporary working directory and returned after execution; the program **cannot access arbitrary host files**. The server is local-only and should not be publicly exposed. GitHub Pages cannot run a server by itself.
+Open **http://127.0.0.1:8787**. The app selects the local compiler on that address. Docker is required for compilation but not for serving the pages; choose **Use browser** to run JSCPP there without Docker. The server binds only to loopback and must not be published to the internet. Programs see only imported virtual files, not arbitrary host files.
 
-## Quality checks
+The public playground can also use a trusted HTTPS endpoint implementing the documented API. No such endpoint is supplied or deployed with this project.
 
-With Node.js 20+:
+## Save and resume
 
-```bash
-node --check app.js
-node --check backend/server.mjs
+Files, code, checkpoints, XP, badges and relics are stored in this browser under the existing `dsa-quest-uwi-v1` key. Existing progress is preserved. Nothing syncs between devices or origins. Clearing browser data removes progress unless you export a backup first.
+
+Use **Playground → Backup files + XP** before moving devices or clearing storage, then **Restore backup** on the destination. The backup includes the new mission steps and guardian victories. Code sent to a configured full compiler is processed at that endpoint.
+
+## Run and test
+
+Use Node 20.11+ (Node 22 in CI). Serve over HTTP; opening `index.html` as a `file://` URL cannot start the interpreter worker.
+
+```sh
 node tests/smoke.mjs
+node tests/adventure-smoke.mjs
+node tests/studio.mjs
+node tests/cpp-missions.mjs
+node tests/runner.mjs
+node tests/backend.mjs
+node tests/native-cpp.mjs
 ```
 
-These are structural smoke checks, not an end-to-end browser or Docker runtime test.
+The native test requires `g++` on PATH and writes ignored artifacts to `.test-work/`. Tests exercise real interpreter output and C++17 compilation, Run versus Check, sample/extra-case failure, repeat rewards, checkpoint progression, restored progress, stale execution, guardian wins/losses, structure invariants, input validation, worker limits, and local HTTP asset delivery. These are automated model/HTTP tests, not a replacement for browser layout or assistive-technology testing. Docker execution/file I/O requires a separate environment with Docker installed.
 
-## Course mapping
+## Publishing
 
-Based on the public [UWI St. Augustine COMP 2611 course description](https://sta.uwi.edu/fst/dcit/content/comp-2611), which specifically names stacks, queues, linked lists, binary trees, heaps and graphs. Topics such as Dijkstra, AVL trees, advanced sorting and special matrices provide deeper study; use your current lecturer's notes and semester syllabus for exact assessment scope.
+`.github/workflows/pages.yml` runs the checks and publishes only the static website and bundled interpreter on pushes to `main`. The backend and test sources are excluded from the Pages artifact. Select **GitHub Actions** as the Pages source if setting up a fresh fork.
 
-**Independent project:** not affiliated with Codédex or UWI. Its game-based format is original rather than a copy of Codédex's artwork, branding or assets.
+The deployed [`version.json`](https://lano07.github.io/DSA-Quest_UWI/version.json) reports the exact source commit. A successful source push alone is not deployment verification; check the Pages workflow and this manifest.
 
-## Privacy & data
+## Course and design references
 
-Progress and workspace text are stored in the browser's localStorage, not on an account. Clearing browser storage removes them unless you export the project first. Code run by the in-browser interpreter stays local except that the interpreter script is fetched from the CDN. Full C++ code and virtual files are sent to the compiler endpoint you configure.
+The [public COMP 2611 description](https://sta.uwi.edu/fst/dcit/content/comp-2611) names stacks, queues, linked lists, binary trees, heaps and graphs. Additional material is enrichment; use your lecturer’s current syllabus for assessment scope.
+
+The public [Codédex course experience](https://www.codedex.io/python) and [public product update](https://www.codedex.io/blog/codedex-update-december-2024) informed the illustrated world, exercise-first pacing and immediate feedback. Pip, the islands, guardians, story and interface artwork are original SVG/CSS; no Codédex logos, artwork or protected lesson text are included.
+
+Independent project, not affiliated with UWI or Codédex. JSCPP is MIT-licensed; its unmodified distribution, revision, checksum and license are documented in [vendor/README.md](vendor/README.md).

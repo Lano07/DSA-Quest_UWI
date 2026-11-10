@@ -3,7 +3,7 @@ window.DSAAdventureData.solutions={
   "hello": "#include <iostream>\nusing namespace std;\nint main(){\n  cout << \"DSA Quest\";\n  return 0;\n}\n",
   "sum": "#include <iostream>\nusing namespace std;\nint main(){\n  int a,b; cin>>a>>b; cout<<a+b;\n  return 0;\n}\n",
   "parity": "#include <iostream>\nusing namespace std;\nint main(){\n  int n;cin>>n; cout<<(n%2==0?\"EVEN\":\"ODD\");\n  return 0;\n}\n",
-  "digits": "#include <iostream>\nusing namespace std;\nint main(){\n  int n;cin>>n; int digits=0; if(n==0)digits=1; else { while(n!=0){ digits++; n/=10; } } cout<<digits;\n  return 0;\n}\n",
+  "digits": "#include <iostream>\nusing namespace std;\nint main(){\n  long long n;cin>>n; if(n<0)n=-n; int digits=0; if(n==0)digits=1; else { while(n!=0){ digits++; n = n / 10; } } cout<<digits;\n  return 0;\n}\n",
   "maximum": "#include <iostream>\nusing namespace std;\nint main(){\n  int a[5];for(int i=0;i<5;i++)cin>>a[i]; int best=a[0];for(int i=1;i<5;i++)if(a[i]>best)best=a[i];cout<<best;\n  return 0;\n}\n",
   "reverse": "#include <iostream>\nusing namespace std;\nint main(){\n  int a[5];for(int i=0;i<5;i++)cin>>a[i];for(int i=4;i>=0;i--){if(i!=4)cout<<\" \";cout<<a[i];}\n  return 0;\n}\n",
   "array-sum": "#include <iostream>\nusing namespace std;\nint main(){\n  int sum=0,x;for(int i=0;i<5;i++){cin>>x;sum+=x;}cout<<sum;\n  return 0;\n}\n",

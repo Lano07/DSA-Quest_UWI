@@ -11,7 +11,7 @@ for(const path of ['app.js','style.css','extras.css','backend/server.mjs']){
 }
 assert.match(index,/app\.js/);
 assert.match(index,/extras\.css/);
-const source=readFileSync(resolve(root,'app.js'),'utf8');
+const source=readFileSync(resolve(root,'app.js'),'utf8').replace(/\r\n/g,'\n');
 const instrumented=source.replace(
   'render();\n})();',
   'globalThis.TEST={lessons,challenges,modules,framesFor,labLabels,renderHome,renderPlayground,renderPractice,renderRoadmap,renderBoss,startBoss,previewLab:(name)=>{labMode=name;labStep=0;return renderLab();}};render();\n})();'

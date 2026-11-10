@@ -1,4 +1,6 @@
-.DS_Store
+.test-work/
+site/
 node_modules/
+.DS_Store
 *.log
 .env

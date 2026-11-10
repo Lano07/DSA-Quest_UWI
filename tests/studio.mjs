@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {createApp} from './harness.mjs';
+const {studio}=createApp();
+const values=()=>Array.from(studio.inspect().values);
+studio.select('stack');studio.perform('add','42');assert.equal(values().at(-1),42);studio.perform('remove');assert.deepEqual(values(),[8,3,5]);studio.perform('undo');assert.equal(values().at(-1),42);
+studio.select('queue');studio.perform('add','42');studio.perform('remove');assert.deepEqual(values(),[3,5,42]);
+for(let index=0;index<5;index++)studio.perform('remove');assert.deepEqual(values(),[]);
+studio.perform('add','not-a-number');assert.deepEqual(values(),[]);
+studio.select('tree');studio.perform('add','8');assert.equal(values().length,5);studio.perform('load',null,'4,2,6,2');assert.deepEqual(values(),[4,2,6]);assert.match(studio.render(),/Binary search tree/);
+studio.select('heap');studio.perform('add','20');assert.equal(values()[0],20);studio.perform('remove');assert.equal(values()[0],9);
+studio.select('hash');studio.perform('add','-1');assert.match(studio.render(),/Key -1, bucket 6/);
+studio.select('graph');studio.perform('bfs',null,null,'A');while(studio.inspect().frame<studio.inspect().frames)studio.perform('step');assert.deepEqual(Array.from(studio.inspect().visited),['A','B','C','D','E']);
+studio.perform('edge',null,null,'A','C');studio.perform('bfs',null,null,'A');while(studio.inspect().frame<studio.inspect().frames)studio.perform('step');assert.deepEqual(Array.from(studio.inspect().visited),['A','B','D']);
+studio.perform('reset');studio.perform('dfs',null,null,'A');while(studio.inspect().frame<studio.inspect().frames)studio.perform('step');assert.deepEqual(Array.from(studio.inspect().visited),['A','B','D','C','E']);
+studio.select('sort');studio.perform('load',null,'9,-3,5,0,5');studio.perform('sort');while(studio.inspect().frame<studio.inspect().frames)studio.perform('step');assert.deepEqual(values(),[-3,0,5,5,9]);
+studio.perform('load',null,'1,,2');assert.deepEqual(values(),[-3,0,5,5,9]);
+studio.perform('undo');assert.deepEqual(values(),[9,-3,5,0,5]);
+console.log('PASS: stack/queue order, underflow, validation, undo, BST uniqueness, heap repair, negative hashes, disconnected BFS, DFS, sorting.');

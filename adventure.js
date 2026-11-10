@@ -1,181 +1,156 @@
-/* DSA Quest — adventure-style lesson experience. Original visuals and curriculum. */
 (function () {
   'use strict';
-  const api = window.DSAQuestBridge;
-  const data = window.DSAAdventureData;
-  if (!api || !data) return;
-  const {chapters, extras, meta} = data;
-  const state=api.state;
-  const esc=api.escapeHTML;
+  const api=window.DSAQuestBridge, data=window.DSAAdventureData, art=window.QuestArt;
+  if(!api||!data||!art)return;
+  const {chapters,extras,meta}=data, state=api.state, esc=api.escapeHTML;
   const missions=[...api.challenges,...extras];
-  const missionById=new Map(missions.map(m=>[m.id,m]));
-  const chapterOf=id=>chapters.find(ch=>ch.items.includes(id));
-  const flat=chapters.flatMap(ch=>ch.items);
-  const complete=()=>flat.filter(id=>state.questDone[id]).length;
-  const badgesWon=()=>chapters.filter(ch=>ch.items.every(id=>state.questDone[id])).length;
-  const nextUnfinished=()=>flat.find(id=>!state.questDone[id])||flat[0];
-  state.questDone=state.questDone&&typeof state.questDone==='object'?state.questDone:{};
-  state.questCode=state.questCode&&typeof state.questCode==='object'?state.questCode:{};
-  state.questHints=state.questHints&&typeof state.questHints==='object'?state.questHints:{};
-  state.questRevealed=state.questRevealed&&typeof state.questRevealed==='object'?state.questRevealed:{};
-  state.questActive=typeof state.questActive==='string'&&flat.includes(state.questActive)?state.questActive:null;
-  state.questTab=state.questTab==='terminal'?'terminal':'terminal';
-  const runtime={busy:false,terminal:'Ready to run. Your output will appear here.',status:'READY',tab:'output',justCompleted:false};
-  const percent=(n,d)=>Math.round(100*n/Math.max(1,d));
-  const label=(m)=>m.title;
-  const chapterIndex=ch=>chapters.indexOf(ch)+1;
-  const pix=(kind)=>'<span class="aq-pixel aq-pixel-'+kind+'" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>';
-  const stars=(n=3)=>'<span class="aq-stars" aria-hidden="true">'+'✦ '.repeat(n)+'</span>';
-  function chapterTile(ch){
-    const done=ch.items.filter(id=>state.questDone[id]).length;
-    const first=ch.items.find(id=>!state.questDone[id])||ch.items[0];
-    return '<article class="aq-chapter" style="--chapter-accent:'+ch.tint+'"><div class="aq-chapter-art"><div class="aq-chapter-sun"></div><div class="aq-chapter-hill hill-back"></div><div class="aq-chapter-hill hill-front"></div><div class="aq-chapter-motif">'+ch.scene+'</div><div class="aq-chapter-caption">CHAPTER '+String(chapterIndex(ch)).padStart(2,'0')+'</div></div><div class="aq-chapter-body"><div class="aq-chapter-caption">'+(done===ch.items.length?'🏅 BADGE EARNED':done+' / '+ch.items.length+' MISSIONS COMPLETE')+'</div><h3>'+esc(ch.name)+'</h3><p>'+esc(ch.subtitle)+'</p><div class="aq-progress" role="progressbar" aria-valuenow="'+percent(done,ch.items.length)+'" aria-valuemin="0" aria-valuemax="100"><span style="width:'+percent(done,ch.items.length)+'%"></span></div><button class="aq-chapter-button" data-quest-open="'+esc(first)+'">'+(done===ch.items.length?'Replay chapter':'Play chapter')+' <span>↗</span></button></div></article>';
+  const missionById=new Map(missions.map(mission=>[mission.id,mission]));
+  const flat=chapters.flatMap(chapter=>chapter.items);
+  for(const key of ['questDone','questCode','questHints','questRevealed','questChecks','questStage','questInput','questBosses']){
+    if(!state[key]||typeof state[key]!=='object'||Array.isArray(state[key]))state[key]={};
   }
-  function introScene(){
-    return '<div class="aq-scene" aria-hidden="true"><div class="aq-scene-sun"></div><div class="aq-scene-cloud c1"></div><div class="aq-scene-cloud c2"></div><div class="aq-hill back"></div><div class="aq-hill front"></div><div class="aq-platform p1"></div><div class="aq-platform p2"></div><div class="aq-platform p3"></div><div class="aq-tower"><span class="aq-tower-light"></span></div><div class="aq-sprite"><span class="aq-sprite-eye"></span></div><div class="aq-particle one">✦</div><div class="aq-particle two">✧</div><div class="aq-particle three">✦</div></div>';
+  state.questActive=flat.includes(state.questActive)?state.questActive:null;
+  let selectedChapter=Math.max(0,chapters.findIndex(chapter=>chapter.items.some(id=>!state.questDone[id])));
+  let generation=0, battle=null, feedback='', mapView='map', legacyBoss=false;
+  let runtime={busy:false,output:'Your output appears here. Make something happen.',status:'READY'};
+  const chapterOf=id=>chapters.find(chapter=>chapter.items.includes(id));
+  const completed=()=>flat.filter(id=>state.questDone[id]).length;
+  const nextId=()=>flat.find(id=>!state.questDone[id])||flat[0];
+  const chapterDone=chapter=>chapter.items.every(id=>state.questDone[id]);
+  const bossNames=['The Null Golem','The Index Imp','The Dangling Sentinel','The Echo Keeper','The Order Ogre','The Root Warden','The Collision Crab','The Complexity Knight','The Disconnect','The Grid Guardian'];
+  const moduleMap=[['foundations'],['foundations','complexity'],['memory','lists'],['recursion'],['stacks'],['trees','bst','heaps'],['hash'],['sorting','complexity'],['graphs','paths'],['extras']];
+  const checkpoints={
+    spark:['What sends a message to the C++ terminal?',['cout << "Hello";','cin >> "Hello";','return "Hello";'],0,'cout writes output; cin reads input. End the statement with a semicolon.'],
+    array:['An array has 5 elements. What is its last valid index?',['5','4','6'],1,'C++ arrays start at index 0, so five elements use indices 0 through 4.'],
+    memory:['If int* p = &x, which expression accesses the value of x?',['&p','p + 1','*p'],2,'Dereferencing with * follows the stored address to the value.'],
+    recursion:['What keeps a recursive function from calling itself forever?',['A base case that the calls eventually reach','A larger array','Calling it twice'],0,'A base case stops recursion. Every recursive step must make progress toward it.'],
+    stack:['Enqueue 4, 7, 9, then dequeue. What comes out?',['9','4','7'],1,'A queue is first in, first out. The earliest item, 4, leaves first.'],
+    tree:['Insert 8, 3, 10 into a BST. What is its inorder traversal?',['8 3 10','10 8 3','3 8 10'],2,'Inorder visits left, node, right. In a BST, this gives sorted order.'],
+    hash:['With h(key) = key % 7, where does key 17 go?',['Bucket 3','Bucket 2','Bucket 7'],0,'17 = 2 × 7 + 3, so the remainder and bucket index are 3.'],
+    search:['Which condition is required for binary search?',['All values are positive','The collection is sorted','There are no duplicates'],1,'Sorted order lets us safely discard half of the search interval.'],
+    graph:['Which structure manages the frontier in breadth-first search?',['A stack','A sorted array','A queue'],2,'A FIFO queue explores the oldest discovered vertices first, one distance layer at a time.'],
+    matrix:['Which condition identifies the main diagonal?',['row == column','row == 0','row + column == 0'],0,'The main diagonal runs from top-left to bottom-right, where row and column indices match.']
+  };
+  const button=(text,attrs='',variant='gold')=>`<button class="quest-button ${variant}" ${attrs}>${text}</button>`;
+  const dialogue=text=>`<div class="pip-dialogue">${art.guide()}<div><span class="micro">PIP · YOUR QUEST COMPANION</span><p>${esc(text)}</p></div></div>`;
+  function chapterPanel(){
+    const chapter=chapters[selectedChapter],progress=chapter.items.filter(id=>state.questDone[id]).length;
+    const first=chapter.items.find(id=>!state.questDone[id])||chapter.items[0];
+    return `<aside class="quest-log" aria-label="Selected chapter"><div class="chapter-preview" style="--tint:${chapter.tint}">${art.island(selectedChapter,chapterDone(chapter))}<span class="micro">ISLAND ${String(selectedChapter+1).padStart(2,'0')} / 10</span></div><div class="quest-log-body"><h2>${esc(chapter.name)}</h2><p class="muted">${esc(chapter.subtitle)}</p><div class="chapter-progress"><span>${progress} of ${chapter.items.length} beacons lit</span><span>${Math.round(progress/chapter.items.length*100)}%</span></div><progress value="${progress}" max="${chapter.items.length}" aria-label="Chapter completion"></progress><ol class="mission-list">${chapter.items.map((id,index)=>`<li><button data-quest-open="${id}"><span class="mission-dot ${state.questDone[id]?'done':''}">${state.questDone[id]?'✓':index+1}</span><span>${esc(missionById.get(id).title)}</span><small>${state.questDone[id]?'DONE':'40 XP'}</small></button></li>`).join('')}</ol>${button(`${progress?'Continue':'Enter'} island →`,`data-quest-open="${first}"`)}<button class="guardian-link" data-guardian="${selectedChapter}">${state.questBosses[chapter.id]?'✓':'♜'} ${esc(bossNames[selectedChapter])}<span>${state.questBosses[chapter.id]?'WON':'+100 XP'}</span></button><small class="quiet">Guardian battles are open for practice any time.</small></div></aside>`;
   }
-  function renderHome(){
-    const count=complete(), level=Math.floor(state.xp/250)+1, upcoming=missionById.get(nextUnfinished());
-    return '<div class="aq-home">'+
-    '<section class="aq-hero"><div class="aq-hero-copy"><span class="aq-kicker"><span class="aq-spark">✦</span> THE INTERACTIVE C++ ADVENTURE</span><h1>LEARN TO <em>CODE.</em><br>PLAY TO <em>LEARN.</em></h1><p>Data structures finally make sense when you can see them, change them, and write the code yourself. Start small. Run real exercises. Earn XP as you go.</p><div class="aq-hero-actions"><button class="aq-btn aq-btn-lime" data-quest-open="'+esc(nextUnfinished())+'">▶ '+(count?'Resume adventure':'Start adventure')+'</button><button class="aq-btn aq-btn-outline" data-page="lab">Explore visual labs ↗</button></div><div class="aq-hero-facts"><span>✦ '+flat.length+' FREE MISSIONS</span><span>⌨ C++ EDITOR + TERMINAL</span><span>🏆 XP AND BADGES</span></div></div>'+introScene()+'</section>'+
-    '<section class="aq-home-summary"><div class="aq-status"><span class="aq-status-icon">✦</span><div><small>YOUR XP</small><strong>'+state.xp.toLocaleString('en-US')+'</strong></div></div><div class="aq-status"><span class="aq-status-icon">⚡</span><div><small>LEVEL</small><strong>'+level+'</strong></div></div><div class="aq-status"><span class="aq-status-icon">✓</span><div><small>QUESTS WON</small><strong>'+count+' <small>/ '+flat.length+'</small></strong></div></div><div class="aq-status"><span class="aq-status-icon">🔥</span><div><small>DAY STREAK</small><strong>'+state.streak+'</strong></div></div></section>'+
-    '<section class="aq-home-next"><div class="aq-home-next-icon">✧</div><div><span class="aq-mini-label">YOUR NEXT MISSION</span><h2>'+esc(upcoming.title)+'</h2><p>'+esc(chapterOf(nextUnfinished()).name)+' · About 5 minutes</p></div><button class="aq-btn aq-btn-lime" data-quest-open="'+esc(upcoming.id)+'">Continue →</button></section>'+
-    '<div class="aq-section-heading"><div><span class="aq-mini-label">THE COURSE MAP</span><h2>Choose your chapter <span>✦</span></h2></div><button class="aq-text-link" data-quest-map>View all 10 chapters →</button></div>'+
-    '<div class="aq-chapter-grid">'+chapters.slice(0,3).map(chapterTile).join('')+'</div>'+
-    '<section class="aq-why"><div class="aq-why-icon">⌘</div><div><h2>Read less. Try more.</h2><p>Every mission puts a short explanation beside a code editor and terminal. Predict, edit, run, get feedback, and advance. You can always switch to the full theory library and practice gym.</p></div><button class="aq-btn aq-btn-outline" data-page="learn">Theory library →</button></section></div>';
-  }
-
-  function renderBadgeShelf(){
-    return '<section class="aq-badge-shelf"><div class="aq-section-heading"><div><span class="aq-mini-label">COLLECT YOUR TROPHIES</span><h2>Chapter badges <span>✦</span></h2></div><span class="aq-badge-count">'+badgesWon()+' / '+chapters.length+' EARNED</span></div><div class="aq-badge-grid">'+chapters.map(ch=>{
-      const won=ch.items.every(id=>state.questDone[id]);
-      return '<div class="aq-badge '+(won?'won':'locked')+'"><span class="aq-badge-art">'+(won?ch.scene:'◇')+'</span><strong>'+esc(ch.name)+'</strong><small>'+(won?'🏅 Earned':'Complete the chapter')+'</small></div>';
-    }).join('')+'</div></section>';
-  }
-
   function renderMap(){
-    const count=complete();
-    return '<div class="aq-map"><header class="aq-map-header"><div class="aq-map-kicker">✧ THE QUEST MAP · UWI COMP 2611</div><h1>Your coding <span>adventure.</span></h1><p>Pick a chapter or resume your next exercise. Nothing is paywalled, and every chapter is available from the start.</p><div class="aq-map-summary"><div><strong>'+count+' / '+flat.length+'</strong><span>missions completed</span></div><div class="aq-progress"><span style="width:'+percent(count,flat.length)+'%"></span></div><button class="aq-btn aq-btn-lime" data-quest-open="'+esc(nextUnfinished())+'">▶ Continue quest</button></div></header><div class="aq-chapter-grid">'+chapters.map(chapterTile).join('')+'</div>'+renderBadgeShelf()+'</div>';
+    const count=completed();
+    return `<div class="world-page"><header class="world-heading"><div><span class="micro">THE COMP 2611 EXPEDITION · C++</span><h1>The islands are <em>waiting.</em></h1><p>Light the beacons. Reconnect the archipelago. One little program at a time.</p></div>${button(count?'Resume adventure →':'Start adventure →',`data-quest-open="${nextId()}"`)}</header><div class="world-layout"><section class="world-map-section" aria-label="Adventure map"><div class="map-topline"><span><i class="live-dot"></i> THE STRUCTURE ISLES</span><div class="view-switch" role="group" aria-label="Map view"><button data-map-view="map" aria-pressed="${mapView==='map'}">Map</button><button data-map-view="list" aria-pressed="${mapView==='list'}">List</button></div></div><div class="island-map ${mapView==='list'?'list-view':''}"><div class="map-stars" aria-hidden="true">✧<span>✦</span><b>✧</b></div><svg class="map-route" viewBox="0 0 1000 520" preserveAspectRatio="none" aria-hidden="true"><path d="M100 130Q200 200 300 130T500 130T700 130T900 130Q1010 260 900 370Q800 440 700 370T500 370T300 370T100 370"/></svg><span class="sea-label" aria-hidden="true">THE SEA OF POSSIBILITIES</span>${chapters.map((chapter,index)=>`<button class="island-node island-${index} ${selectedChapter===index?'selected':''} ${chapterDone(chapter)?'complete':''}" data-island="${index}" style="--tint:${chapter.tint}" aria-pressed="${selectedChapter===index}" aria-label="${esc(chapter.name)}, ${chapter.items.filter(id=>state.questDone[id]).length} of ${chapter.items.length} missions complete"><span class="island-index">${chapterDone(chapter)?'✓':String(index+1).padStart(2,'0')}</span>${art.island(index,chapterDone(chapter))}<strong>${esc(chapter.name)}</strong><span class="beacons" aria-hidden="true">${chapter.items.map(id=>`<i class="${state.questDone[id]?'lit':''}"></i>`).join('')}</span></button>`).join('')}<span class="map-compass" aria-hidden="true">N<br>✥</span></div><div class="map-legend"><span><i class="beacon-key"></i> ${count} / ${flat.length} beacons lit</span><span>All islands open · Explore at your pace</span></div>${dialogue(count?'Welcome back, explorer. Your beacons are safe. Choose an island, or pick up your next mission.':'Hey, I’m Pip! The Null has scrambled our islands. Help me restore their beacons with C++. Your first spell? A single line of output.')}</section>${chapterPanel()}</div><section class="expedition-extras" aria-label="More ways to play"><button data-page="lab"><span class="extra-icon">⌬</span><span><strong>The Tinker Grove</strong><small>Push, connect, rearrange. See structures move.</small></span><b>↗</b></button><button data-page="practice"><span class="extra-icon coral">⚔</span><span><strong>Practice arena</strong><small>24 coding challenges. Put your skills to work.</small></span><b>↗</b></button><button data-page="playground"><span class="extra-icon violet">⌘</span><span><strong>Creative mode</strong><small>Your own C++ editor. No quests attached.</small></span><b>↗</b></button></section>${relicShelf()}<div class="expedition-foot"><span>LEVEL ${Math.floor(state.xp/250)+1} EXPLORER · ${chapters.filter(chapterDone).length}/10 ISLANDS RESTORED</span><button class="text-button" data-page="learn">Open the field guide ↗</button></div></div>`;
   }
-  function missionPanel(m){
-    const id=m.id,chapter=chapterOf(id),index=chapter.items.indexOf(id),t=meta[id]||{};
-    const solved=Boolean(state.questDone[id]),hints=state.questHints[id]||0,info=t.teach||m.desc;
-    const reveal=Boolean(state.questRevealed[id]);
-    const code=state.questCode[id]===undefined?m.starter:state.questCode[id];
-    const next=flat[flat.indexOf(id)+1];
-    const visualMap={spark:'array',array:'array',memory:'linked',recursion:'recursion',stack:'stack',tree:'tree',hash:'hash',search:'binary',graph:'graph',matrix:'array'};
-    const visual=visualMap[chapter.id]||'array';
-    return '<div class="aq-exercise">'+
-      '<div class="aq-exercise-head"><button class="aq-return" data-quest-map aria-label="Return to quest map">← Course map</button><div class="aq-exercise-breadcrumb">'+esc(chapter.name)+' <span>/</span> Exercise '+(index+1)+' of '+chapter.items.length+'</div><span class="aq-exercise-xp">'+(solved?'✓ COMPLETED':'✦ 40 XP')+'</span></div>'+
-      '<div class="aq-exercise-progress"><span style="width:'+percent(index+1,chapter.items.length)+'%"></span></div>'+
-      '<div class="aq-lesson-split"><section class="aq-instructions"><div class="aq-instruction-heading"><span class="aq-num">'+String(flat.indexOf(id)+1).padStart(2,'0')+'.</span><span class="aq-small-label">CODE MISSION</span></div><h1>'+esc(m.title)+'</h1><div class="aq-learning-tag"><span>✦</span> '+esc(m.category||'C++')+' · Beginner to intermediate</div><p class="aq-story">'+esc(t.story||'Your next puzzle is waiting. Read the clue, then write the code that makes it work.')+'</p><div class="aq-lesson-section"><h2><span class="aq-hash">#</span> Learn it</h2><p>'+esc(info)+'</p>'+(t.snippet?'<div class="aq-inline-code"><div class="aq-code-label">QUICK EXAMPLE</div><code>'+esc(t.snippet)+'</code></div>':'')+'<button class="aq-visual-link" data-quest-visual="'+visual+'">◎ Watch this concept move <span>↗</span></button></div><div class="aq-lesson-section"><h2><span class="aq-hash">#</span> Your mission</h2><p>'+esc(t.task||m.desc)+'</p><div class="aq-objective"><span>🎯</span><div><strong>GOAL</strong><div>'+esc(m.desc)+'</div></div></div></div><div class="aq-io"><div><strong>EXAMPLE INPUT</strong><pre>'+esc(m.input||'(no input needed)')+'</pre></div><div><strong>EXPECTED OUTPUT</strong><pre>'+esc(m.expected)+'</pre></div></div><div class="aq-hint-box"><button data-quest-hint class="aq-help-btn">✧ '+(hints?'Another clue':'Need a hint?')+' <span>⌄</span></button>'+(hints?'<p>'+esc(m.hint||'Compare your code with the goal and the example output.')+'</p>':'')+(hints>=2?'<p>'+esc(t.tip||'Trace one input at a time and check your loop boundaries.')+'</p>':'')+'</div>'+
-      (reveal?'<div class="aq-solution-panel"><strong>Reference solution</strong><pre>'+esc((data.solutions||{})[id]||'Reference solution unavailable for this exercise.')+'</pre><p>Understand every line before copying. You can try a different solution too.</p><button class="aq-btn aq-btn-outline aq-btn-small" data-quest-load-solution '+(!(data.solutions||{})[id]?'disabled':'')+'>Load into editor</button></div>':'<button class="aq-show-solution" data-quest-reveal>Show a worked solution</button>')+
-      '</section>'+
-      '<section class="aq-coding"><div class="aq-editor-title"><div class="aq-editor-tabs"><span class="aq-editor-tab active">⌘ main.cpp</span><span class="aq-editor-muted">C++ · '+(api.fullRunnerUrl()?'full compiler':'browser runner')+'</span></div><div class="aq-editor-tools"><button data-quest-reset aria-label="Reset code">↺ Reset</button><button data-page="playground">↗ Playground</button></div></div><div class="aq-code-edit"><div class="aq-line-gutter" id="aqGutter">'+Array.from({length:Math.max(14,code.split('\n').length)},(_,i)=>i+1).join('<br>')+'</div><textarea spellcheck="false" id="aqCode" aria-label="Edit your C++ solution" autocapitalize="off" autocomplete="off" autocorrect="off">'+esc(code)+'</textarea></div><div class="aq-editor-bottom"><span class="aq-shortcut">⌘ / Ctrl + Enter to run</span><div class="aq-exec-actions"><button class="aq-btn aq-btn-outline aq-btn-small" id="aqRunBtn" data-quest-run '+(runtime.busy?'disabled':'')+'>▶ Run code</button><button class="aq-btn aq-btn-run" id="aqCheckBtn" data-quest-check '+(runtime.busy?'disabled':'')+'>✓ Check mission</button></div></div><div class="aq-terminal"><div class="aq-terminal-head"><div class="aq-terminal-tabs"><span class="active">▣ Terminal</span></div><span id="aqTerminalStatus" class="aq-terminal-status '+(runtime.status==='PASSED'?'pass':'')+'">'+runtime.status+'</span></div><pre id="aqTerminalText" aria-live="polite">'+esc(runtime.terminal)+'</pre><div class="aq-stdin"><label for="aqInput">STANDARD INPUT <span>stdin</span></label><textarea id="aqInput" spellcheck="false" rows="2" aria-label="Program input">'+esc(m.input||'')+'</textarea></div></div></section></div>'+
-      '<footer class="aq-lesson-footer"><div class="aq-footer-left"><span>✦</span><strong>'+esc(m.title)+'</strong><small>'+ (index+1)+' / '+chapter.items.length+'</small></div><div class="aq-footer-actions"><button class="aq-btn aq-btn-outline" data-quest-prev '+(flat.indexOf(id)===0?'disabled':'')+'>← Prev</button><button class="aq-btn '+(solved?'aq-btn-lime':'aq-btn-muted')+'" data-quest-next '+(!solved?'disabled aria-label="Run and pass this mission to continue"':'')+'>'+(next?'Next mission →':'Quest completed ✓')+'</button></div></footer></div>';
+  function relicShelf(){
+    const earned=chapters.filter(chapterDone).length+chapters.filter(chapter=>state.questBosses[chapter.id]).length;
+    return `<details class="collection"><summary>Your collection <span>${earned} / 20 discoveries</span></summary><div class="collection-grid">${chapters.map((chapter,index)=>`<div class="collection-item ${chapterDone(chapter)?'earned':''}">${art.island(index,chapterDone(chapter))}<strong>${esc(chapter.name)}</strong><small>${chapterDone(chapter)?'✓ Chapter badge earned':'◇ Complete every mission'}</small><small>${state.questBosses[chapter.id]?'✓ Guardian relic earned':'◇ Defeat the guardian'}</small></div>`).join('')}</div></details>`;
   }
-  function renderQuest(){
-    return state.questActive ? missionPanel(missionById.get(state.questActive)) : renderMap();
+  function stageOf(id){return Number.isInteger(state.questStage[id])?Math.min(2,Math.max(0,state.questStage[id])):state.questDone[id]?2:0;}
+  function editor(mission){
+    const code=state.questCode[mission.id]??mission.starter;
+    return `<section class="mission-ide" aria-label="C++ editor and terminal"><div class="ide-bar"><span><i class="live-dot"></i> main.cpp</span><button class="text-button" data-quest-reset ${runtime.busy?'disabled':''}>↺ Reset</button></div><label class="sr-only" for="aqCode">Edit your C++ solution</label><div class="code-area"><pre class="line-gutter" id="aqGutter" aria-hidden="true">${code.split('\n').map((line,index)=>index+1).join('\n')}</pre><textarea id="aqCode" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off">${esc(code)}</textarea></div><div class="ide-actions"><small>Ctrl/⌘ + Enter · run<br>Tab moves to the next control</small>${button('▶ Run code','id="aqRunBtn" data-quest-run '+(runtime.busy?'disabled':''),'subtle')}${button('Check mission ✓','id="aqCheckBtn" data-quest-check '+(runtime.busy?'disabled':''))}</div><div class="terminal-bar"><span>TERMINAL</span><span id="aqTerminalStatus">${runtime.status}</span></div><pre id="aqTerminalText" role="status" aria-live="polite">${esc(runtime.output)}</pre><div class="mission-input"><label class="micro" for="aqInput">PROGRAM INPUT · stdin</label><textarea id="aqInput" rows="2" spellcheck="false">${esc(state.questInput[mission.id]??mission.input??'')}</textarea></div><div class="runner-disclosure">${api.fullRunnerUrl()?'Full C++ endpoint selected. Code is sent to your configured server.':'Browser C++ subset · No STL, fstream or multi-file compilation.'} <button class="text-button" data-page="playground">Runner options ↗</button></div></section>`;
   }
-  function renderPage(page){
-    if(page==='home')return renderHome();
-    if(page==='quest')return renderQuest();
-    return null;
+  function missionPanel(mission){
+    const id=mission.id,chapter=chapterOf(id),info=meta[id]||{},stage=stageOf(id),solved=Boolean(state.questDone[id]);
+    const checkpoint=data.checkpoints[id]||checkpoints[chapter.id];
+    let content='';
+    if(stage===0)content=`<span class="micro">01 · DISCOVER</span><h2>A small idea. A new power.</h2><p>${esc(info.teach||mission.desc)}</p>${info.snippet?`<pre class="lesson-code">${esc(info.snippet)}</pre>`:''}<div class="mission-objective"><span>✦ YOUR OBJECTIVE</span><p>${esc(info.task||mission.desc)}</p></div>${button('Got it. Let’s try →','data-stage="1"')}`;
+    if(stage===1)content=`<span class="micro">02 · PREDICT</span><h2>A quick checkpoint.</h2><p>${esc(checkpoint[0])}</p><div class="checkpoint-options">${checkpoint[1].map((option,index)=>`<button data-checkpoint="${index}" ${state.questChecks[id]?'disabled':''} class="${state.questChecks[id]&&index===checkpoint[2]?'correct':''}"><span>${String.fromCharCode(65+index)}</span>${esc(option)}</button>`).join('')}</div><div class="checkpoint-feedback" role="status">${state.questChecks[id]?'✓ '+esc(checkpoint[3]):esc(feedback)}</div>${button('Open the editor →','data-stage="2" '+(state.questChecks[id]?'':'disabled'))}`;
+    if(stage===2)content=`<span class="micro">03 · BUILD</span><h2>${solved?'Beacon restored. Nice work!':'Your mission'}</h2><p>${esc(info.task||mission.desc)}</p><div class="sample-pair"><div><span class="micro">SAMPLE INPUT</span><pre>${esc(mission.input||'(none)')}</pre></div><div><span class="micro">EXPECTED OUTPUT</span><pre>${esc(mission.expected)}</pre></div></div><details class="mission-help"><summary>Need a clue?</summary><p>${esc(mission.hint||info.tip||'Trace the sample input one step at a time.')}</p><p>${esc(info.tip||'Check your boundaries and try a small example first.')}</p></details><details class="mission-help"><summary>Revisit the idea</summary><p>${esc(info.teach||mission.desc)}</p></details><details class="mission-help"><summary>Worked solution</summary><p>Use this to understand the steps, then try it yourself.</p><pre>${esc(data.solutions[id]||'')}</pre>${button('Load reference solution','data-quest-load-solution','subtle')}</details>${solved?`<div class="victory-banner"><span>✦</span><div><strong>BEACON LIT</strong><p>40 XP secured. Your progress is saved.</p></div></div>${button(flat.indexOf(id)===flat.length-1?'Return to the islands →':'Next mission →','data-quest-next')}`:'<p class="quiet">Run experiments freely. Check mission tests the sample and any extra cases before awarding XP.</p>'}`;
+    return `<div class="mission-page"><div class="mission-heading"><button class="text-button" data-quest-map>← The islands</button><span>${esc(chapter.name)} / ${chapter.items.indexOf(id)+1} of ${chapter.items.length}</span><span class="xp-label">${solved?'✓ COMPLETE':'✦ 40 XP'}</span></div><div class="mission-title"><span class="micro">MISSION ${String(flat.indexOf(id)+1).padStart(2,'0')}</span><h1>${esc(mission.title)}</h1></div><nav class="mission-steps" aria-label="Mission steps">${['Discover','Predict','Build'].map((label,index)=>`<button data-stage="${index}" aria-current="${stage===index?'step':'false'}" ${index===2&&!state.questChecks[id]&&!solved?'disabled':''}><span>${index+1}</span>${label}${index===1&&state.questChecks[id]?' ✓':''}</button>`).join('')}</nav><div class="mission-workspace ${stage===2?'coding-stage':''}"><section class="mission-lesson">${dialogue(info.story||'Every beacon begins with one small idea. Give this one a try.')}<div class="lesson-step">${content}</div></section>${stage===2?editor(mission):`<aside class="mission-scenery">${art.island(chapters.indexOf(chapter),solved)}<span class="micro">${esc(chapter.name)}</span><p>${stage===0?'Every great program starts with a little curiosity.':'Think it through. Mistakes cost no hearts here.'}</p><button class="text-button" data-quest-visual="${chapter.id}">Explore this structure ↗</button></aside>`}</div><div class="mission-bottom"><button class="text-button" data-quest-prev ${flat.indexOf(id)===0?'disabled':''}>← Previous mission</button><span>Auto-saved on this device</span><button class="text-button" data-quest-map>Back to map ↗</button></div></div>`;
   }
-  const activeMission=()=>state.questActive!==null;
-  function redraw(){api.render();}
   function open(id){
     if(!missionById.has(id))return;
-    state.questActive=id;
-    runtime.terminal='Edit the starter code and press Run. The terminal will show your output.';
-    runtime.status='READY';runtime.justCompleted=false;
+    generation++;state.questActive=id;feedback='';
+    runtime={busy:false,output:'Your output appears here. Make something happen.',status:'READY'};
     api.save();api.navigate('quest');
   }
-  function chooseMap(){state.questActive=null;api.save();api.navigate('quest');}
-  function setResult(txt,status){
-    runtime.terminal=txt;runtime.status=status;
-    const pre=document.querySelector('#aqTerminalText'),indicator=document.querySelector('#aqTerminalStatus');
-    if(pre)pre.textContent=txt;
-    if(indicator){indicator.textContent=status;indicator.classList.toggle('pass',status==='PASSED');}
+  function chooseMap(){generation++;state.questActive=null;api.save();api.navigate('quest');}
+  function setResult(output,status){
+    runtime.output=output;runtime.status=status;
+    const terminal=document.querySelector('#aqTerminalText'),indicator=document.querySelector('#aqTerminalStatus');
+    if(terminal)terminal.textContent=output;if(indicator)indicator.textContent=status;
   }
-  function norm(s){return String(s==null?'':s).trim().replace(/\s+/g,' ');}
+  const normalize=value=>String(value??'').trim().replace(/\s+/g,' ');
   async function run(check=false){
-    const id=state.questActive,m=missionById.get(id),field=document.querySelector('#aqCode');
-    if(!m||runtime.busy||!field)return;
-    state.questCode[id]=field.value;
-    api.save();runtime.busy=true;
-    const runButton=document.querySelector('#aqRunBtn'),checkButton=document.querySelector('#aqCheckBtn');if(runButton)runButton.disabled=true;if(checkButton)checkButton.disabled=true;
-    const input=check?(m.input||''):(document.querySelector('#aqInput')?.value??m.input??'');
-    setResult('Compiling and running your C++ code…','RUNNING');
+    const id=state.questActive,mission=missionById.get(id),field=document.querySelector('#aqCode');
+    if(!mission||runtime.busy||!field)return;
+    const token=++generation,code=field.value;
+    state.questCode[id]=code;api.save();runtime.busy=true;
+    for(const selector of ['#aqRunBtn','#aqCheckBtn']){const control=document.querySelector(selector);if(control)control.disabled=true;}
+    setResult(check?'Testing your spell…':'Running your experiment…','RUNNING');
     try{
-      const code=field.value,res=await api.executeCPP(code,input,{'main.cpp':code});
-      if(res.exitCode!==0){setResult((res.stderr||'')+'\n'+(res.output||'')+'\nProgram exited with code '+res.exitCode,'ERROR');return;}
-      if(!check){setResult((res.output||'(no output)')+(res.stderr?'\n\nstderr:\n'+res.stderr:'')+'\n\n[process exited: '+res.exitCode+']','FINISHED');return;}
-      if(norm(res.output)!==norm(m.expected)){
-        setResult('Your output:\n'+(res.output||'(no output)')+'\n\nExpected output:\n'+m.expected+'\n\nCompare carefully. Try adjusting your code.','TRY AGAIN');return;
+      const input=check?mission.input:state.questInput[id]??mission.input;
+      const cases=check?[{input:mission.input||'',expected:mission.expected},...(mission.tests||[])]:[{input:input||''}];
+      let sample='';
+      for(let index=0;index<cases.length;index++){
+        const test=cases[index],result=await api.executeCPP(code,test.input,{'main.cpp':code});
+        if(token!==generation)return;
+        if(Number(result.exitCode)!==0){setResult(`The spell needs a little repair.\n\n${result.stderr||result.output||'Program exited unsuccessfully.'}\n\nExit code: ${result.exitCode}`,'ERROR');return;}
+        if(index===0)sample=result.output;
+        if(check&&normalize(result.output)!==normalize(test.expected)){setResult(`Almost! Case ${index+1} needs another look.\n\nInput: ${test.input||'(none)'}\nExpected: ${test.expected}\nYour output: ${result.output||'(none)'}\n\nNo XP lost. Change one thing and try again.`,'TRY AGAIN');return;}
       }
-      for(let i=0;i<(m.tests||[]).length;i++){
-        const t=m.tests[i];setResult('Sample passed. Checking extra case '+(i+1)+'…','TESTING');
-        const check=await api.executeCPP(code,t.input,{'main.cpp':code});
-        if(check.exitCode!==0||norm(check.output)!==norm(t.expected)){
-          setResult('The sample passed, but another case needs work.\n\nInput:\n'+t.input+'\n\nExpected:\n'+t.expected+'\n\nYour output:\n'+(check.output||'(none)')+(check.stderr?'\n'+check.stderr:''),'TRY AGAIN');return;
-        }
-      }
-      const first=!state.questDone[id];
-      if(first){state.questDone[id]=true;api.award(40);}
-      runtime.justCompleted=true;
-      setResult('✓ MISSION COMPLETE!\n\n'+(res.output||'(no output)')+'\n\n'+(first?'+40 XP earned!':'Replay complete!')+' You can continue to the next mission.','PASSED');
-      redraw();
-    }catch(e){setResult('Could not run this C++ program.\n\n'+(e.message||String(e))+'\n\nThe browser runner supports only a subset of C++. For more C++ support, use the optional local compiler described in the Playground.','ERROR');}
-    finally{
-      runtime.busy=false;const button=document.querySelector('#aqRunBtn'),check=document.querySelector('#aqCheckBtn');if(button)button.disabled=false;if(check)check.disabled=false;
-    }
+      if(!check){setResult(`${sample||'(no output)'}\n\nExperiment finished. Use Check mission when you’re ready.`,'FINISHED');return;}
+      const first=!state.questDone[id];state.questDone[id]=true;state.questStage[id]=2;
+      if(first)api.award(40);else api.save();
+      setResult(`✓ BEACON RESTORED!\n\n${sample}\n\n${cases.length} test case${cases.length===1?'':'s'} passed. ${first?'+40 XP!':'Replay complete — XP already collected.'}`,'PASSED');
+      runtime.busy=false;api.render();
+    }catch(error){if(token===generation)setResult(`We couldn’t run that spell.\n\n${error.message}\n\nBrowser mode supports a C++ subset. The Playground explains full compiler options.`,'ERROR');}
+    finally{if(token===generation){runtime.busy=false;for(const selector of ['#aqRunBtn','#aqCheckBtn']){const control=document.querySelector(selector);if(control)control.disabled=false;}}}
   }
-  document.addEventListener('click',function(e){
-    const openBtn=e.target.closest('[data-quest-open]');
-    if(openBtn){e.preventDefault();open(openBtn.getAttribute('data-quest-open'));return;}
-    if(e.target.closest('[data-quest-map]')){e.preventDefault();chooseMap();return;}
-    const visualBtn=e.target.closest('[data-quest-visual]');if(visualBtn){e.preventDefault();api.openLab(visualBtn.getAttribute('data-quest-visual'));return;}
-    if(e.target.closest('[data-quest-run]')){e.preventDefault();run(false);return;}
-    if(e.target.closest('[data-quest-check]')){e.preventDefault();run(true);return;}
-    const id=state.questActive;
-    if(!id)return;
-    if(e.target.closest('[data-quest-hint]')){
-      state.questHints[id]=Math.min(2,(state.questHints[id]||0)+1);api.save();redraw();return;
-    }
-    if(e.target.closest('[data-quest-reveal]')){
-      state.questRevealed[id]=true;api.save();redraw();return;
-    }
-    if(e.target.closest('[data-quest-load-solution]')){
-      const solution=(data.solutions||{})[id];
-      if(solution){state.questCode[id]=solution;api.save();redraw();api.toast('Reference solution loaded. Run it to examine the result.');}return;
-    }
-    if(e.target.closest('[data-quest-reset]')){
-      if(window.confirm('Reset your code to the starter for this mission?')){
-        state.questCode[id]=missionById.get(id).starter;api.save();redraw();
-      }return;
-    }
-    if(e.target.closest('[data-quest-prev]')){
-      const i=flat.indexOf(id);if(i>0)open(flat[i-1]);return;
-    }
-    if(e.target.closest('[data-quest-next]')&&state.questDone[id]){
-      const i=flat.indexOf(id);if(i<flat.length-1)open(flat[i+1]);else chooseMap();return;
-    }
+  function startGuardian(index){
+    legacyBoss=false;
+    const related=api.lessons.filter(lesson=>moduleMap[index].includes(lesson.module));
+    const pool=related.length>=3?related:api.lessons;
+    const offset=(state.questBosses[chapters[index].id]||0)%pool.length;
+    battle={chapter:index,questions:[0,1,2].map(step=>pool[(offset+step)%pool.length]),position:0,hearts:3,correct:0,selected:null,ended:false};
+    api.navigate('boss');
+  }
+  function renderBoss(){
+    if(!battle)return `<div class="world-page"><header class="world-heading"><div><span class="micro">THE GUARDIAN GAUNTLET</span><h1>A little courage.<br><em>A lot of C++.</em></h1><p>Three questions. Three hearts. Beat every guardian to collect all ten relics.</p></div>${art.guardian()}</header><div class="guardian-grid">${chapters.map((chapter,index)=>`<button class="guardian-card" data-guardian="${index}">${art.guardian(index)}<span class="micro">${esc(chapter.name)}</span><h2>${esc(bossNames[index])}</h2><span>${state.questBosses[chapter.id]?'✓ RELIC COLLECTED':'BATTLE · +100 XP'}</span></button>`).join('')}</div>${button('Challenge the original Code Hydra','data-legacy-boss','subtle')}</div>`;
+    const chapter=chapters[battle.chapter],question=battle.questions[battle.position],won=battle.correct===3;
+    return `<div class="battle-page"><button class="text-button" data-guardian-back>← All guardians</button><span class="micro">${esc(chapter.name)} · GUARDIAN BATTLE</span><h1>${esc(bossNames[battle.chapter])}</h1><div class="battle-stage">${art.guardian(battle.chapter)}<div><span class="micro">GUARDIAN SHIELD</span><progress max="3" value="${3-battle.correct}" aria-label="Guardian shield"></progress><p>${3-battle.correct} / 3 shield points</p><span class="battle-hearts" aria-label="${battle.hearts} hearts remaining">${'♥'.repeat(battle.hearts)}${'♡'.repeat(3-battle.hearts)}</span></div></div><section class="battle-question">${battle.ended?`<span class="micro">${won?'RELIC RECOVERED':'TRY ANOTHER STRATEGY'}</span><h2>${won?'The island is safe.':'Every attempt teaches you something.'}</h2><p>${won?'You answered every question correctly. First victory earns 100 XP.':'You need three correct answers in one run to break the shield. Review the explanations and give it another go.'}</p>${button(won?'Back to the islands →':'Try again →',won?'data-quest-map':`data-guardian="${battle.chapter}"`)}`:`<span class="micro">ROUND ${battle.position+1} / 3</span><h2>${esc(question.question)}</h2><div class="checkpoint-options">${question.options.map((option,index)=>`<button data-guardian-answer="${index}" ${battle.selected!==null?'disabled':''} class="${battle.selected!==null&&index===question.answer?'correct':''}">${esc(option)}</button>`).join('')}</div>${battle.selected!==null?`<div role="status" class="checkpoint-feedback">${battle.selected===question.answer?'Direct hit!':'A glancing miss.'} ${esc(question.why)}</div>${button(battle.position===2?'See the result →':'Next round →','data-guardian-next')}`:''}`}</section></div>`;
+  }
+  function renderPage(page){
+    if(page==='home')return renderMap();
+    if(page==='quest')return state.questActive&&missionById.has(state.questActive)?missionPanel(missionById.get(state.questActive)):renderMap();
+    if(page==='boss'&&!legacyBoss)return renderBoss();
+    if(page==='lab'&&window.QuestStudio)return window.QuestStudio.render();
+    return null;
+  }
+  document.addEventListener('click',event=>{
+    const find=selector=>event.target.closest(selector);
+    const navigation=find('[data-page]');if(navigation?.getAttribute('data-page')==='boss'){legacyBoss=false;battle=null;api.render();return;}
+    const opener=find('[data-quest-open]');if(opener){open(opener.getAttribute('data-quest-open'));return;}
+    if(find('[data-quest-map]')){chooseMap();return;}
+    const island=find('[data-island]');if(island){selectedChapter=Number(island.getAttribute('data-island'));api.render();const heading=document.querySelector('.quest-log h2');heading?.setAttribute('tabindex','-1');heading?.focus({preventScroll:true});return;}
+    const view=find('[data-map-view]');if(view){mapView=view.getAttribute('data-map-view');api.render();return;}
+    const guardian=find('[data-guardian]');if(guardian){legacyBoss=false;startGuardian(Number(guardian.getAttribute('data-guardian')));return;}
+    if(find('[data-guardian-back]')){battle=null;api.render();return;}
+    if(find('[data-legacy-boss]')){legacyBoss=true;api.render();return;}
+    const answer=find('[data-guardian-answer]');
+    if(answer&&battle&&!battle.ended&&battle.selected===null){battle.selected=Number(answer.getAttribute('data-guardian-answer'));if(battle.selected===battle.questions[battle.position].answer)battle.correct++;else battle.hearts--;api.render();return;}
+    if(find('[data-guardian-next]')&&battle&&battle.selected!==null&&!battle.ended){if(battle.position===2){battle.ended=true;if(battle.correct===3){const id=chapters[battle.chapter].id;if(!state.questBosses[id])api.award(100);state.questBosses[id]=(state.questBosses[id]||0)+1;api.save();}}else{battle.position++;battle.selected=null;}api.render();return;}
+    const visual=find('[data-quest-visual]');if(visual){window.QuestStudio?.select(visual.getAttribute('data-quest-visual'));api.navigate('lab');return;}
+    if(find('[data-quest-run]')){run(false);return;}
+    if(find('[data-quest-check]')){run(true);return;}
+    const id=state.questActive;if(!id||!missionById.has(id))return;
+    const stage=find('[data-stage]');if(stage){const next=Number(stage.getAttribute('data-stage'));if(next===2&&!state.questChecks[id]&&!state.questDone[id])return;state.questStage[id]=next;feedback='';api.save();api.render();return;}
+    const choice=find('[data-checkpoint]');if(choice&&!state.questChecks[id]){const check=data.checkpoints[id]||checkpoints[chapterOf(id).id];if(Number(choice.getAttribute('data-checkpoint'))===check[2]){state.questChecks[id]=true;api.save();}else feedback='Not quite — '+check[3]+' Try again. No hearts lost.';api.render();return;}
+    if(find('[data-quest-load-solution]')&&!runtime.busy){state.questCode[id]=data.solutions[id];api.save();api.render();return;}
+    if(find('[data-quest-reset]')&&!runtime.busy&&window.confirm('Restore this mission’s starter code?')){state.questCode[id]=missionById.get(id).starter;api.save();api.render();return;}
+    if(find('[data-quest-prev]')){const index=flat.indexOf(id);if(index>0)open(flat[index-1]);return;}
+    if(find('[data-quest-next]')&&state.questDone[id]){const next=flat[flat.indexOf(id)+1];if(next)open(next);else chooseMap();}
   });
-  document.addEventListener('input',function(e){
-    if(e.target.id==='aqCode'&&state.questActive){
-      state.questCode[state.questActive]=e.target.value;api.save();
-      const gutter=document.querySelector('#aqGutter');
-      if(gutter){const total=Math.max(14,e.target.value.split('\n').length);gutter.innerHTML=Array.from({length:total},(_,i)=>i+1).join('<br>');}
-    }
+  document.addEventListener('input',event=>{
+    if(!state.questActive)return;
+    if(event.target.id==='aqCode'){state.questCode[state.questActive]=event.target.value;api.save();const gutter=document.querySelector('#aqGutter');if(gutter)gutter.textContent=event.target.value.split('\n').map((line,index)=>index+1).join('\n');}
+    if(event.target.id==='aqInput'){state.questInput[state.questActive]=event.target.value;api.save();}
   });
-  document.addEventListener('keydown',function(e){
-    if(e.target.id!=='aqCode')return;
-    if(e.key==='Tab'){
-      e.preventDefault();const t=e.target,i=t.selectionStart;t.setRangeText('  ',i,t.selectionEnd,'end');t.dispatchEvent(new Event('input',{bubbles:true}));
-    }
-    if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();run(false);}
-  });
-  window.DSAAdventure={renderPage,activeMission,renderMap,renderHome,missions,chapters,open};
-  if(['home','quest'].includes(location.hash.replace('#',''))){api.render();}
-  else if(!location.hash||location.hash==='#home')api.render();
+  document.addEventListener('scroll',event=>{if(event.target.id==='aqCode'){const gutter=document.querySelector('#aqGutter');if(gutter)gutter.scrollTop=event.target.scrollTop;}},true);
+  document.addEventListener('keydown',event=>{if(event.target.id==='aqCode'&&event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();run(false);}});
+  function onNavigate(page){if(page!=='quest'){generation++;runtime.busy=false;}}
+  window.DSAAdventure={renderPage,activeMission:()=>Boolean(state.questActive),renderMap,renderHome:renderMap,missions,chapters,open,run,startGuardian,onNavigate};
+  api.render();
 })();

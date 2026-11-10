@@ -11,7 +11,8 @@ window.DSAAdventureData = {
         "hello",
         "sum",
         "parity",
-        "digits"
+        "digits",
+        "count"
       ]
     },
     {
@@ -50,8 +51,7 @@ window.DSAAdventureData = {
       "items": [
         "factorial",
         "fibonacci",
-        "power",
-        "count"
+        "power"
       ]
     },
     {

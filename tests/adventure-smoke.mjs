@@ -1,92 +1,65 @@
-// DSA Quest adventure integration smoke test. Run: node tests/adventure-smoke.mjs
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
-import {resolve} from 'node:path';
-import vm from 'node:vm';
-
-const root=resolve(import.meta.dirname||new URL('.',import.meta.url).pathname,'..');
-const read=name=>readFileSync(resolve(root,name),'utf8');
-const elements=new Map(),events={};
-function element(selector){
-  if(!elements.has(selector))elements.set(selector,{
-    textContent:'',innerHTML:'',value:'',disabled:false,style:{},
-    classList:{add(){},remove(){},toggle(){}},
-    addEventListener(){}
-  });
-  return elements.get(selector);
-}
-const location={hash:'#home',origin:'https://lano07.github.io',hostname:'lano07.github.io',port:'',protocol:'https:'};
-const window={scrollTo(){},addEventListener(){},history:{replaceState(_a,_b,url){location.hash=url;}}};
-const document={
-  querySelector:element,querySelectorAll:()=>[],
-  addEventListener(type,fn){(events[type]??=[]).push(fn);},
-  body:{classList:{remove(){},toggle(){}}}
-};
-const saved={};
-const localStorage={
-  getItem:k=>saved[k]||null,
-  setItem:(k,value)=>{saved[k]=value;}
-};
-const ctx={
-  window,document,location,localStorage,
-  setTimeout:()=>1,clearTimeout(){},
-  setInterval:()=>1,clearInterval(){},
-  confirm:()=>true,prompt:()=>null,
-  Event:class Event{}
-};
-for(const file of ['app.js','adventure-data.js','adventure-solutions.js','adventure.js']){
-  vm.runInNewContext(read(file),ctx,{filename:file,timeout:5000});
-}
-const api=window.DSAQuestBridge,adventure=window.DSAAdventure,data=window.DSAAdventureData;
-assert.ok(api&&adventure&&data,'Course scripts did not load');
-const ids=adventure.chapters.flatMap(c=>c.items);
+import {createApp,read} from './harness.mjs';
+const {api,adventure,data,click,element,input,saved}=createApp();
+const ids=adventure.chapters.flatMap(chapter=>chapter.items);
 assert.equal(adventure.chapters.length,10);
 assert.equal(ids.length,35);
 assert.equal(new Set(ids).size,35);
-const available=new Set([...api.challenges,...data.extras].map(x=>x.id));
-for(const id of ids){
-  assert.ok(available.has(id),'Missing mission '+id);
-  assert.ok(data.meta[id]?.teach,'Missing explanation '+id);
-  assert.ok(data.solutions[id]?.includes('main()'),'Missing C++ solution '+id);
-}
-const home=adventure.renderHome();
-assert.match(home,/Start adventure/);
-assert.match(home,/aq-scene/);
-const map=adventure.renderMap();
-assert.match(map,/The First Spark/);
-assert.match(map,/Graph Gate/);
+for(const id of ids){assert.ok(adventure.missions.find(mission=>mission.id===id));assert.ok(data.meta[id]?.teach);assert.ok(data.solutions[id]);assert.ok(data.checkpoints[id]);}
+assert.equal(new Set(ids.map(id=>data.checkpoints[id][0])).size,35);
+assert.match(adventure.renderMap(),/island-map/);
+assert.match(adventure.renderMap(),/PIP/);
 adventure.open('hello');
-assert.equal(api.state.questActive,'hello');
-assert.equal(location.hash,'#quest');
-const lesson=adventure.renderPage('quest');
-assert.match(lesson,/aq-lesson-split/);
-assert.match(lesson,/aqCode/);
-assert.match(lesson,/aqTerminalText/);
-assert.match(lesson,/Check mission/);
-assert.match(lesson,/Your mission/);
-const clickCallbacks=events.click||[];
-function click(name){
-  const t={
-    getAttribute:key=>key===name?'':null,
-    closest:selector=>selector==='['+name+']'?t:null
-  };
-  for(const fn of clickCallbacks)fn({target:t,preventDefault(){}});
-}
-element('#aqCode').value=data.solutions.hello;
-element('#aqInput').value='custom input';
-api.executeCPP=async()=>({output:'DSA Quest',exitCode:0,stderr:''});
-click('data-quest-run');
-await new Promise(resolve=>setImmediate(resolve));
-assert.equal(Boolean(api.state.questDone.hello),false,'Run should not grade submissions');
-click('data-quest-check');
-await new Promise(resolve=>setImmediate(resolve));
-assert.equal(api.state.questDone.hello,true,'Check should award completion');
-assert.ok(api.state.xp>=40);
-assert.match(adventure.renderPage('quest'),/Next mission/);
-assert.ok(JSON.parse(saved['dsa-quest-uwi-v1']).questDone.hello,'Progress did not persist');
-const index=read('index.html'),workflow=read('.github/workflows/pages.yml');
-for(const filename of ['adventure.js','adventure-data.js','adventure-solutions.js','adventure.css']){
-  assert.ok(index.includes(filename),'HTML missing '+filename);
-  assert.ok(workflow.includes(filename),'Pages workflow missing '+filename);
-}
-console.log('PASS: 10 illustrated chapters, 35 missions, split IDE, Run/Check, XP save, route and deployment assets');
+assert.match(adventure.renderPage('quest'),/01 · DISCOVER/);
+await click('data-stage','2');
+assert.equal(api.state.questStage.hello,undefined,'The checkpoint should gate the editor');
+await click('data-stage','1');
+await click('data-checkpoint','1');
+assert.match(adventure.renderPage('quest'),/No hearts lost/);
+assert.equal(api.state.questChecks.hello,undefined);
+await click('data-checkpoint','0');
+await click('data-stage','2');
+assert.match(adventure.renderPage('quest'),/aqCode/);
+await input('#aqCode',data.solutions.hello);
+await input('#aqInput','custom stdin');
+await adventure.run(false);
+assert.equal(Boolean(api.state.questDone.hello),false,'Run must not award progress');
+await adventure.run(true);
+assert.equal(api.state.questDone.hello,true);
+assert.equal(api.state.xp,40);
+await adventure.run(true);
+assert.equal(api.state.xp,40,'Replay must not award XP twice');
+assert.equal(api.state.questInput.hello,'custom stdin');
+assert.equal(JSON.parse(saved['dsa-quest-uwi-v1']).questDone.hello,true);
+const restored=createApp(JSON.parse(saved['dsa-quest-uwi-v1']));
+assert.equal(restored.api.state.questDone.hello,true);
+assert.equal(restored.api.state.questCode.hello,data.solutions.hello);
+adventure.open('digits');element('#aqCode').value=data.solutions.digits;
+api.executeCPP=async()=>({output:'1',exitCode:0});
+await adventure.run(true);
+assert.equal(api.state.questDone.digits,undefined,'Passing only the sample must not pass extra cases');
+assert.match(element('#aqTerminalText').textContent,/Case 2/);
+let completeRun;
+api.executeCPP=()=>new Promise(resolve=>{completeRun=resolve;});
+adventure.open('sum');element('#aqCode').value=data.solutions.sum;
+const pending=adventure.run(true);
+adventure.open('parity');completeRun({output:'12',exitCode:0});await pending;
+assert.equal(api.state.questDone.sum,undefined,'A stale run must not change a different mission');
+const guardian=createApp();
+guardian.adventure.startGuardian(0);
+const firstThree=guardian.api.lessons.filter(lesson=>lesson.module==='foundations').slice(0,3);
+for(const question of firstThree){await guardian.click('data-guardian-answer',question.answer);await guardian.click('data-guardian-next');}
+assert.equal(guardian.api.state.xp,100);
+assert.equal(guardian.api.state.questBosses.spark,1);
+await guardian.click('data-guardian-next');
+assert.equal(guardian.api.state.xp,100,'Victory button must not reward twice');
+const loss=createApp();loss.adventure.startGuardian(0);
+for(const question of firstThree){await loss.click('data-guardian-answer',(question.answer+1)%question.options.length);await loss.click('data-guardian-next');}
+assert.equal(loss.api.state.xp,0);
+assert.match(loss.adventure.renderPage('boss'),/TRY ANOTHER STRATEGY/);
+for(const file of ['adventure.js','adventure.css','world-art.js','studio.js','quest-checkpoints.js','adventure-data.js','adventure-solutions.js']){assert.ok(read('index.html').includes(file));assert.ok(read('.github/workflows/pages.yml').includes(file));}
+assert.ok(read('.github/workflows/pages.yml').includes('vendor'));
+assert.doesNotMatch(read('adventure.js'),/key==='Tab'/);
+assert.doesNotMatch(read('app.js'),/key==='Tab'/);
+assert.ok(createApp('bad stored state').adventure.renderMap());
+console.log('PASS: 35 distinct checkpoints, Run/Check, extra-case failure, no duplicate XP, persistence, stale-run isolation, guardian win/loss, deployment assets.');

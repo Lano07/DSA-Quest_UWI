@@ -23,19 +23,34 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Use Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
       - name: Check JavaScript and server syntax
         run: |
           node --check app.js
           node --check adventure.js
           node --check adventure-data.js
           node --check adventure-solutions.js
+          node --check world-art.js
+          node --check studio.js
+          node --check quest-checkpoints.js
           node --check backend/server.mjs
           node tests/smoke.mjs
           node tests/adventure-smoke.mjs
+          node tests/studio.mjs
+          node tests/cpp-missions.mjs
+          node tests/runner.mjs
+          node tests/backend.mjs
+          node tests/native-cpp.mjs
       - name: Prepare public website
         run: |
           mkdir -p site
           cp index.html app.js style.css extras.css adventure.css adventure-data.js adventure-solutions.js adventure.js site/
+          cp world-art.js studio.js quest-checkpoints.js site/
+          cp -r vendor site/
+          node -e "require('fs').writeFileSync('site/version.json', JSON.stringify({commit:process.env.GITHUB_SHA,experience:'structure-isles-v2'}))"
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Upload website

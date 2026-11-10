@@ -6,7 +6,7 @@
  */
 import http from 'node:http';
 import { spawn } from 'node:child_process';
-import { mkdtemp, writeFile, readFile, readdir, chmod, rm } from 'node:fs/promises';
+import { mkdtemp, writeFile, readFile, readdir, chmod, rm, open } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve, extname } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -15,7 +15,7 @@ const HOST = '127.0.0.1';
 const PORT = Number(process.env.PORT || 8787);
 const ROOT = resolve(import.meta.dirname || new URL('.', import.meta.url).pathname, '..');
 const MIME = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8'};
-const VALID_NAME = /^[a-zA-Z0-9_.-]{1,64}$/;
+const VALID_NAME = /^[a-zA-Z0-9_][a-zA-Z0-9_.-]{0,63}$/;
 let active = 0;
 const MAX_ACTIVE = 2;
 const json = (res,status,value)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(value));};
@@ -29,10 +29,13 @@ async function body(req){
   try{return JSON.parse(Buffer.concat(parts).toString('utf8'));}catch{const e=new Error('Expected JSON');e.status=400;throw e;}
 }
 async function readSafe(file,limit=128000){
+  let handle;
   try{
-    const b=await readFile(file);
-    return b.subarray(0,limit).toString('utf8')+(b.length>limit?'\n[truncated]':'');
-  }catch{return '';}
+    handle=await open(file,'r');
+    const buffer=Buffer.alloc(limit+1);
+    const {bytesRead}=await handle.read(buffer,0,limit+1,0);
+    return buffer.subarray(0,Math.min(bytesRead,limit)).toString('utf8')+(bytesRead>limit?'\n[truncated]':'');
+  }catch{return '';}finally{await handle?.close();}
 }
 function docker(args,limitMs=16000){
   return new Promise((resolve,reject)=>{
@@ -52,6 +55,8 @@ async function compileAndRun(request){
   const incoming=request.files&&typeof request.files==='object'&&!Array.isArray(request.files)?request.files:{};
   if(Object.keys(incoming).length>24)throw Object.assign(new Error('Too many files'),{status:400});
   const dir=await mkdtemp(join(tmpdir(),'dsa-quest-'));
+  const name='dsa-'+randomUUID().slice(0,16);
+  let launched=false;
   try{
     await chmod(dir,0o777);
     const files={...incoming,'main.cpp':code};
@@ -71,15 +76,16 @@ async function compileAndRun(request){
       'printf "%s" "$status" > .exitcode',
       'exit 0'
     ].join('\n');
-    const name='dsa-'+randomUUID().slice(0,16);
     const args=[
       'run','--rm','--name',name,'--network','none',
       '--cpus','1','--memory','384m','--pids-limit','64','--read-only',
+      '--ulimit','fsize=1048576:1048576',
       '--cap-drop','ALL','--security-opt','no-new-privileges',
       '--tmpfs','/tmp:rw,nosuid,size=64m',
       '--user','65534:65534','-w','/work',
       '-v',dir+':/work:rw','gcc:14','sh','-c',command
     ];
+    launched=true;
     const result=await docker(args);
     if(result.code!==0)throw Object.assign(new Error('Compiler container failed. Run docker pull gcc:14. '+result.log.slice(0,1000)),{status:503});
     const output=await readSafe(join(dir,'.stdout'));
@@ -95,6 +101,7 @@ async function compileAndRun(request){
     }
     return {stdout:output,stderr:compileError+runtimeError,exitCode:Number.isFinite(exitCode)?exitCode:1,files:generated};
   }finally{
+    if(launched)await docker(['rm','-f',name],5000).catch(()=>{});
     await rm(dir,{recursive:true,force:true,maxRetries:3,retryDelay:50});
   }
 }
@@ -109,7 +116,7 @@ const server=http.createServer(async(req,res)=>{
       finally{active--;}
     }
     if(req.method!=='GET')return json(res,405,{error:'Method not supported'});
-    const files={'/':'index.html','/index.html':'index.html','/app.js':'app.js','/style.css':'style.css','/extras.css':'extras.css','/adventure.css':'adventure.css','/adventure-data.js':'adventure-data.js','/adventure-solutions.js':'adventure-solutions.js','/adventure.js':'adventure.js'};
+    const files={'/':'index.html','/index.html':'index.html','/app.js':'app.js','/style.css':'style.css','/extras.css':'extras.css','/adventure.css':'adventure.css','/adventure-data.js':'adventure-data.js','/adventure-solutions.js':'adventure-solutions.js','/adventure.js':'adventure.js','/world-art.js':'world-art.js','/studio.js':'studio.js','/quest-checkpoints.js':'quest-checkpoints.js','/vendor/jscpp.js':'vendor/jscpp.js','/vendor/JSCPP-LICENSE':'vendor/JSCPP-LICENSE'};
     if(!Object.hasOwn(files,path))return json(res,404,{error:'Not found'});
     const filename=files[path],data=await readFile(join(ROOT,filename));
     res.writeHead(200,{'Content-Type':MIME[extname(filename)]||'application/octet-stream'});
