@@ -436,6 +436,6 @@ document.addEventListener('click',e=>{const n=e.target.closest('.sidebar [data-p
 $('#menuToggle').addEventListener('click',()=>document.body.classList.toggle('menu-open'));
 window.addEventListener('hashchange',()=>{const hash=location.hash.replace('#','');if(titleMap[hash])navigate(hash);});
 if(titleMap[location.hash.replace('#','')])page=location.hash.replace('#','');
-window.DSAQuestBridge={state,chapters:modules,lessons,challenges,award,save,toast,navigate,render,executeCPP,escapeHTML,fullRunnerUrl};
+window.DSAQuestBridge={state,chapters:modules,lessons,challenges,award,save,toast,navigate,render,executeCPP,escapeHTML,fullRunnerUrl,openLab:(mode)=>{stopLabAuto();labMode=mode;labStep=0;navigate('lab');}};
 render();
 })();
