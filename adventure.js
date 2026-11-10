@@ -46,7 +46,7 @@
   }
 
   function renderBadgeShelf(){
-    return '<section class="aq-badge-shelf"><div class="aq-section-heading"><div><span class="aq-mini-label">COLLECT YOUR TROPHIES</span><h2>Chapter badges <span>✦</span></h2><span class="aq-badge-count">'+badgesWon()+' / '+chapters.length+' EARNED</span></div><div class="aq-badge-grid">'+chapters.map(ch=>{
+    return '<section class="aq-badge-shelf"><div class="aq-section-heading"><div><span class="aq-mini-label">COLLECT YOUR TROPHIES</span><h2>Chapter badges <span>✦</span></h2></div><span class="aq-badge-count">'+badgesWon()+' / '+chapters.length+' EARNED</span></div><div class="aq-badge-grid">'+chapters.map(ch=>{
       const won=ch.items.every(id=>state.questDone[id]);
       return '<div class="aq-badge '+(won?'won':'locked')+'"><span class="aq-badge-art">'+(won?ch.scene:'◇')+'</span><strong>'+esc(ch.name)+'</strong><small>'+(won?'🏅 Earned':'Complete the chapter')+'</small></div>';
     }).join('')+'</div></section>';
