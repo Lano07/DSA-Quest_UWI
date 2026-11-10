@@ -231,3 +231,6 @@ body.aq-mission-active #app{width:100%;max-width:100%;overflow:visible}
 .aq-exec-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .aq-exec-actions .aq-btn{min-height:39px}
 @media(max-width:740px){.aq-editor-bottom{align-items:flex-start;flex-wrap:wrap}.aq-shortcut{flex-basis:100%}.aq-exec-actions{width:100%}.aq-exec-actions>.aq-btn{flex:1 1 130px}}
+
+.aq-visual-link{margin:3px 0 0;display:inline-flex;gap:12px;align-items:center;justify-content:space-between;background:#1b3341;border:1px solid #3e8799;border-radius:7px;color:#a8eff9;padding:11px 15px;font:700 11px var(--aq-mono);cursor:pointer;transition:background .14s}
+.aq-visual-link span{font-size:17px}.aq-visual-link:hover{background:#264c5b;border-color:#72dcec}
